@@ -1,0 +1,16 @@
+return {
+  bg = "#1a1b26",
+  bg_dark = "#16161e",
+  surface = "#24283b",
+  surface_alt = "#292e42",
+  border = "#414868",
+  muted = "#a9b1d6",
+  dim = "#565f89",
+  fg = "#c0caf5",
+  blue = "#7aa2f7",
+  cyan = "#7dcfff",
+  green = "#9ece6a",
+  orange = "#e0af68",
+  red = "#f7768e",
+  purple = "#bb9af7",
+}
