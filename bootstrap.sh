@@ -20,6 +20,18 @@ link() {
   fi
 }
 
+install_tmux_plugins() {
+  local tpm_dir="$HOME/.tmux/plugins/tpm"
+
+  if [[ ! -d "$tpm_dir/.git" ]]; then
+    mkdir -p "${tpm_dir:h}"
+    git clone https://github.com/tmux-plugins/tpm "$tpm_dir"
+  fi
+
+  tmux start-server \; source-file "$HOME/.tmux.conf"
+  "$tpm_dir/bin/install_plugins"
+}
+
 link "$dotfiles_dir/zsh/.zshrc" "$HOME/.zshrc"
 link "$dotfiles_dir/tmux/.tmux.conf" "$HOME/.tmux.conf"
 link "$dotfiles_dir/git/.gitconfig" "$HOME/.gitconfig"
@@ -31,3 +43,5 @@ link "$dotfiles_dir/starship/.config/starship.toml" "$HOME/.config/starship.toml
 link "$dotfiles_dir/lazygit/.config/lazygit" "$HOME/.config/lazygit"
 link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
 link "$dotfiles_dir/ghostty/.config/ghostty/config.ghostty" "$HOME/.config/ghostty/config.ghostty"
+
+install_tmux_plugins

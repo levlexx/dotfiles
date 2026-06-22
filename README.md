@@ -21,6 +21,7 @@ mise run doctor
 - Go tools are installed into `~/go/bin` using the mise-managed Go runtime.
 - Editor LSP and formatter tools are managed by mise, not Homebrew.
 - Neovim uses native `vim.pack`, not LazyVim or Mason.
+- tmux plugins are installed by `bootstrap.sh` through TPM.
 
 ## Managed Links
 
