@@ -83,6 +83,15 @@ Neo-tree file operations:
 | `<leader>ghr` | Reset hunk |
 | `<leader>ghs` | Stage hunk |
 
+### Nx
+
+| Key | Action |
+| --- | --- |
+| `<leader>nx` | Nx actions |
+| `<leader>nr` | Nx run many |
+| `<leader>na` | Nx affected |
+| `<leader>ng` | Nx generators |
+
 ### Code / LSP
 
 | Key | Action |

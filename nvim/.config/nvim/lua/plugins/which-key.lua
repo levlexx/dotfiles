@@ -24,6 +24,7 @@ which_key.add({
   { "<leader>b", group = "Buffers" },
   { "<leader>w", group = "Windows" },
   { "<leader>t", group = "Terminal / tests" },
+  { "<leader>n", group = "Nx" },
   { "<leader>x", group = "Diagnostics" },
   { "<leader>q", group = "Quit / session" },
   { "<leader>u", group = "UI toggles" },

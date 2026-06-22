@@ -44,7 +44,7 @@
     "neo-tree.nvim": {
       "rev": "ebd66767191714e008ce73b769518a763ff31bdc",
       "src": "https://github.com/nvim-neo-tree/neo-tree.nvim",
-      "version": "'v3.x'"
+      "version": "3.0.0 - 4.0.0"
     },
     "nui.nvim": {
       "rev": "de740991c12411b663994b2860f1a4fd0937c130",
@@ -74,9 +74,17 @@
       "rev": "4916d6592ede8c07973490d9322f187e07dfefac",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter"
     },
+    "nx.nvim": {
+      "rev": "f8a3a21b3d540889401a40d1f2803083794c0372",
+      "src": "https://github.com/Equilibris/nx.nvim"
+    },
     "plenary.nvim": {
       "rev": "74b06c6c75e4eeb3108ec01852001636d85a932b",
       "src": "https://github.com/nvim-lua/plenary.nvim"
+    },
+    "telescope.nvim": {
+      "rev": "9377230aa5305d9e9aca4ed8dadf1070fb4aa9fc",
+      "src": "https://github.com/nvim-telescope/telescope.nvim"
     },
     "tokyonight.nvim": {
       "rev": "cdc07ac78467a233fd62c493de29a17e0cf2b2b6",
