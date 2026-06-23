@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+cd "${1:-.}" 2>/dev/null || exit 0
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+
+branch="$(git branch --show-current 2>/dev/null || true)"
+tag="$(git describe --tags --exact-match 2>/dev/null || true)"
+
+if [ -n "$branch" ] && [ -n "$tag" ]; then
+  ref="$branch/$tag"
+elif [ -n "$branch" ]; then
+  ref="$branch"
+elif [ -n "$tag" ]; then
+  ref="$tag"
+else
+  ref="$(git rev-parse --short HEAD 2>/dev/null || true)"
+fi
+
+[ -n "$ref" ] || exit 0
+printf '#[fg=#292e42,bg=default]#[fg=#9ece6a,bg=#292e42,bold] %s#[fg=#292e42,bg=default] ' "$ref"

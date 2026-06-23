@@ -11,7 +11,9 @@ export CLICOLOR=1
 # --------------------------------
 # Homebrew / PATH
 # --------------------------------
-eval "$(/opt/homebrew/bin/brew shellenv)"
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 
 path=(
   "$HOME/go/bin"
@@ -26,6 +28,8 @@ path=(${path:#/usr/local/go/bin})
 typeset -U path PATH
 export PATH
 
+[[ -o interactive ]] || return
+
 # --------------------------------
 # Ghostty shell integration fallback
 # --------------------------------
@@ -36,10 +40,12 @@ fi
 # --------------------------------
 # Version managers
 # --------------------------------
-eval "$(mise activate zsh)"
-path=(${path:#/usr/local/go/bin})
-typeset -U path PATH
-export PATH
+if command -v mise >/dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+  path=(${path:#/usr/local/go/bin})
+  typeset -U path PATH
+  export PATH
+fi
 
 # --------------------------------
 # Shell behavior
@@ -64,9 +70,17 @@ compinit
 # --------------------------------
 # Tools
 # --------------------------------
-eval "$(zoxide init zsh)"
-eval "$(atuin init zsh)"
-eval "$(direnv hook zsh)"
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh)"
+fi
+
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook zsh)"
+fi
 
 # fzf restores zsh options verbatim; `zle` is not changeable here.
 __fzf_restore_options() {
@@ -76,17 +90,21 @@ __fzf_restore_options() {
   eval "$restore"
 }
 
-__fzf_zsh_init="$(fzf --zsh)"
-__fzf_zsh_init="${__fzf_zsh_init//eval \$__fzf_key_bindings_options/__fzf_restore_options \"\$__fzf_key_bindings_options\"}"
-__fzf_zsh_init="${__fzf_zsh_init//eval \$__fzf_completion_options/__fzf_restore_options \"\$__fzf_completion_options\"}"
-source <(print -r -- "$__fzf_zsh_init")
-unset __fzf_zsh_init
+if command -v fzf >/dev/null 2>&1; then
+  __fzf_zsh_init="$(fzf --zsh)"
+  __fzf_zsh_init="${__fzf_zsh_init//eval \$__fzf_key_bindings_options/__fzf_restore_options \"\$__fzf_key_bindings_options\"}"
+  __fzf_zsh_init="${__fzf_zsh_init//eval \$__fzf_completion_options/__fzf_restore_options \"\$__fzf_completion_options\"}"
+  source <(print -r -- "$__fzf_zsh_init")
+  unset __fzf_zsh_init
+fi
 unfunction __fzf_restore_options
 
 # --------------------------------
 # Prompt
 # --------------------------------
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 # --------------------------------
 # Completions
@@ -168,8 +186,6 @@ bindkey '^R' atuin-search-zsh
 # source ~/.autoenv/activate.sh
 # . "$HOME/.moon/bin/env"
 
-if [ -z "$TMUX" ]; then
-
-  tmux attach -t main || tmux new -s main
-
+if [[ -z "${TMUX:-}" ]] && command -v tmux >/dev/null 2>&1; then
+  exec tmux new-session -A -s main
 fi

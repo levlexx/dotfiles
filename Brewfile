@@ -1,3 +1,5 @@
+cask "ghostty"
+
 brew "atuin"
 brew "bat"
 brew "direnv"

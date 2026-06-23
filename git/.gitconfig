@@ -1,5 +1,17 @@
-[user]
-	email = levlexx@gmail.com
-	name = levlexx
+[include]
+	path = .gitconfig.local
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true
 [push]
 	autoSetupRemote = true
+[fetch]
+	prune = true
+[diff]
+	algorithm = histogram
+	colorMoved = default
+[merge]
+	conflictstyle = zdiff3
+[rerere]
+	enabled = true

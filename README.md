@@ -27,6 +27,7 @@ mise run doctor
 
 - `~/.zshrc`
 - `~/.tmux.conf`
+- `~/.tmux/git-ref`
 - `~/.gitconfig`
 - `~/.config/git/ignore`
 - `~/.dockerignore`
@@ -35,4 +36,7 @@ mise run doctor
 - `~/.config/starship.toml`
 - `~/.config/lazygit`
 - `~/.config/atuin/config.toml`
-- `~/.config/ghostty/config.ghostty`
+- `~/.config/ghostty/config`
+- `~/.config/ghostty/themes/Tokyo Night`
+
+Machine-specific Git identity belongs in `~/.gitconfig.local`.

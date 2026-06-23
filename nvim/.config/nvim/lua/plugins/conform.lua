@@ -16,8 +16,23 @@ conform.setup({
     jsonc = { "biome" },
     yaml = { "prettier" },
   },
-  format_on_save = {
-    timeout_ms = 1500,
-    lsp_format = "fallback",
-  },
+  format_on_save = function(bufnr)
+    if vim.bo[bufnr].filetype == "typespec" then
+      return
+    end
+
+    return {
+      timeout_ms = 1500,
+      lsp_format = "fallback",
+    }
+  end,
+  format_after_save = function(bufnr)
+    if vim.bo[bufnr].filetype ~= "typespec" then
+      return
+    end
+
+    return {
+      lsp_format = "fallback",
+    }
+  end,
 })
