@@ -27,7 +27,6 @@ mise run doctor
 
 - `~/.zshrc`
 - `~/.tmux.conf`
-- `~/.tmux/git-ref`
 - `~/.gitconfig`
 - `~/.config/git/ignore`
 - `~/.dockerignore`

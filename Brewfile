@@ -1,3 +1,5 @@
+tap "pyroscope-io/brew"
+
 cask "ghostty"
 
 brew "atuin"
@@ -6,9 +8,9 @@ brew "direnv"
 brew "eza"
 brew "fd"
 brew "fzf"
-brew "lazygit"
 brew "mise"
 brew "neovim"
+brew "pyroscope"
 brew "ripgrep"
 brew "starship"
 brew "tmux"

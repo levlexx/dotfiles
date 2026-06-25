@@ -57,7 +57,6 @@ install_tmux_plugins() {
 
 link "$dotfiles_dir/zsh/.zshrc" "$HOME/.zshrc"
 link "$dotfiles_dir/tmux/.tmux.conf" "$HOME/.tmux.conf"
-link "$dotfiles_dir/tmux/.tmux/git-ref" "$HOME/.tmux/git-ref"
 link "$dotfiles_dir/git/.gitconfig" "$HOME/.gitconfig"
 link "$dotfiles_dir/git/.config/git/ignore" "$HOME/.config/git/ignore"
 link "$dotfiles_dir/docker/.dockerignore" "$HOME/.dockerignore"
