@@ -21,7 +21,7 @@ go = "1.26.4"
 "aqua:jesseduffield/lazydocker" = "0.25.2"
 "aqua:jesseduffield/lazygit" = "0.62.2"
 "aqua:tilt-dev/tilt" = "0.37.4"
-
+"aqua:go-task/task" = "3.51.1"
 [env]
 GOBIN = "{{env.HOME}}/go/bin"
 JS_DEBUG_ADAPTER = "{{env.HOME}}/.local/share/vscode-js-debug/dist/src/dapDebugServer.js"
