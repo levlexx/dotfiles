@@ -24,6 +24,7 @@ conform.setup({
     return {
       timeout_ms = 1500,
       lsp_format = "fallback",
+      quiet = true,
     }
   end,
   format_after_save = function(bufnr)
@@ -33,6 +34,7 @@ conform.setup({
 
     return {
       lsp_format = "fallback",
+      quiet = true,
     }
   end,
 })

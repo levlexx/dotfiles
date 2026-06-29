@@ -4,6 +4,54 @@ if blink_ok then
   capabilities = blink.get_lsp_capabilities(capabilities)
 end
 
+local heavy_dirs = {
+  "**/node_modules",
+  "**/.git",
+  "**/.angular",
+  "**/.nx",
+  "**/dist",
+  "**/build",
+  "**/coverage",
+  "**/vendor",
+}
+
+local function has_path(path)
+  return vim.uv.fs_stat(path) ~= nil
+end
+
+local function has_package(root, name)
+  local package_json = root .. "/package.json"
+  if not has_path(package_json) then
+    return false
+  end
+
+  local ok, content = pcall(vim.fn.readfile, package_json)
+  if not ok then
+    return false
+  end
+
+  local json_ok, package = pcall(vim.json.decode, table.concat(content, "\n"))
+  if not json_ok or type(package) ~= "table" then
+    return false
+  end
+
+  local dependencies = package.dependencies or {}
+  local dev_dependencies = package.devDependencies or {}
+  return dependencies[name] ~= nil or dev_dependencies[name] ~= nil
+end
+
+local function angular_root_dir(bufnr, on_dir)
+  local file = vim.api.nvim_buf_get_name(bufnr)
+  local root = vim.fs.root(file, { "angular.json", "nx.json" })
+  if root == nil then
+    return
+  end
+
+  if has_path(root .. "/angular.json") or has_package(root, "@angular/core") or has_path(root .. "/node_modules/@angular/core") then
+    on_dir(root)
+  end
+end
+
 vim.diagnostic.config({
   severity_sort = true,
   virtual_text = {
@@ -31,15 +79,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("n", "<leader>cr", vim.lsp.buf.rename, "Rename")
 
     map("n", "gr", function()
-      require("fzf-lua").lsp_references()
+      require("plugins.fzf").run("lsp_references")
     end, "References")
 
     map("n", "<leader>cs", function()
-      require("fzf-lua").lsp_document_symbols()
+      require("plugins.fzf").run("lsp_document_symbols")
     end, "Document symbols")
 
     map("n", "<leader>cS", function()
-      require("fzf-lua").lsp_workspace_symbols()
+      require("plugins.fzf").run("lsp_workspace_symbols")
     end, "Workspace symbols")
   end,
 })
@@ -48,6 +96,17 @@ vim.lsp.config("gopls", {
   capabilities = capabilities,
   settings = {
     gopls = {
+      ["build.directoryFilters"] = {
+        "-**/node_modules",
+        "-**/.git",
+        "-**/.angular",
+        "-**/.nx",
+        "-**/dist",
+        "-**/build",
+        "-**/coverage",
+        "-**/vendor",
+      },
+      ["ui.diagnostic.diagnosticsDelay"] = "500ms",
       gofumpt = true,
       staticcheck = false,
       vulncheck = "Prompt",
@@ -94,6 +153,20 @@ vim.lsp.config("vtsls", {
     vtsls = {
       enableMoveToFileCodeAction = true,
       autoUseWorkspaceTsdk = true,
+      tsserver = {
+        maxTsServerMemory = 4096,
+        watchOptions = {
+          excludeDirectories = heavy_dirs,
+          excludeFiles = {
+            "**/.git/**",
+            "**/.angular/**",
+            "**/.nx/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/coverage/**",
+          },
+        },
+      },
       experimental = {
         maxInlayHintLength = 30,
         completion = {
@@ -103,8 +176,22 @@ vim.lsp.config("vtsls", {
     },
     typescript = {
       updateImportsOnFileMove = { enabled = "always" },
+      preferences = {
+        importModuleSpecifier = "shortest",
+        importModuleSpecifierEnding = "minimal",
+        includePackageJsonAutoImports = "on",
+        quoteStyle = "auto",
+      },
       suggest = {
+        autoImports = true,
+        classMemberSnippets = { enabled = true },
         completeFunctionCalls = true,
+        completeJSDocs = true,
+        enabled = true,
+        includeAutomaticOptionalChainCompletions = true,
+        includeCompletionsForImportStatements = true,
+        objectLiteralMethodSnippets = { enabled = true },
+        paths = true,
       },
       inlayHints = {
         enumMemberValues = { enabled = true },
@@ -115,7 +202,30 @@ vim.lsp.config("vtsls", {
         variableTypes = { enabled = false },
       },
     },
+    javascript = {
+      updateImportsOnFileMove = { enabled = "always" },
+      preferences = {
+        importModuleSpecifier = "shortest",
+        importModuleSpecifierEnding = "minimal",
+        quoteStyle = "auto",
+      },
+      suggest = {
+        autoImports = true,
+        classMemberSnippets = { enabled = true },
+        completeFunctionCalls = true,
+        completeJSDocs = true,
+        enabled = true,
+        includeAutomaticOptionalChainCompletions = true,
+        includeCompletionsForImportStatements = true,
+        paths = true,
+      },
+    },
   },
+})
+
+vim.lsp.config("angularls", {
+  capabilities = capabilities,
+  root_dir = angular_root_dir,
 })
 
 vim.lsp.config("tsp_server", {
@@ -154,6 +264,7 @@ vim.lsp.config("docker_compose_language_service", {
 vim.lsp.enable({
   "gopls",
   "lua_ls",
+  "angularls",
   "vtsls",
   "tsp_server",
   "jsonls",

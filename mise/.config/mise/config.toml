@@ -1,9 +1,10 @@
 [tools]
-node = "25.9.0"
+node = "24.18.0"
 go = "1.26.4"
 "npm:@biomejs/biome" = "2.5.0"
 "npm:prettier" = "3.8.4"
 "npm:@vtsls/language-server" = "0.3.0"
+"npm:@angular/language-server" = "22.0.4"
 "npm:@typespec/compiler" = "1.13.0"
 "npm:tree-sitter-cli" = "0.26.9"
 "npm:vscode-langservers-extracted" = "4.10.0"
@@ -148,6 +149,7 @@ for tool in \
   prettier \
   stylua \
   lua-language-server \
+  ngserver \
   vtsls \
   tsp \
   tsp-server \
@@ -175,4 +177,14 @@ if [ -f "${JS_DEBUG_ADAPTER:-}" ]; then
 else
   echo 'adapter file: MISSING'
 fi
+'''
+
+[tasks.nvim-startuptime]
+description = "Measure Neovim startup time"
+run = '''
+set -eu
+
+log="${NVIM_STARTUPTIME_LOG:-/tmp/nvim-startup.log}"
+nvim --startuptime "$log" +qa
+printf 'Neovim startup log: %s\n' "$log"
 '''

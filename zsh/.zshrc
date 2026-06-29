@@ -65,7 +65,11 @@ SAVEHIST=10000
 HISTFILE="$HOME/.zsh_history"
 
 autoload -Uz compinit
-compinit
+if [[ -f "${ZDOTDIR:-$HOME}/.zcompdump" ]]; then
+  compinit -C
+else
+  compinit
+fi
 
 # --------------------------------
 # Tools

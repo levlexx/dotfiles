@@ -14,7 +14,7 @@ local function setup()
   configured = true
 
   vim.pack.add({
-    { src = gh("nvim-neo-tree/neo-tree.nvim"), version = "v3.x" },
+    { src = gh("nvim-neo-tree/neo-tree.nvim"), version = vim.version.range("3") },
     { src = gh("nvim-lua/plenary.nvim") },
     { src = gh("MunifTanjim/nui.nvim") },
   }, {
