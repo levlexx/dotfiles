@@ -62,10 +62,19 @@ local function setup()
         enabled = true,
         leave_dirs_open = false,
       },
-      use_libuv_file_watcher = true,
+      use_libuv_file_watcher = false,
       filtered_items = {
         hide_dotfiles = false,
-        hide_gitignored = false,
+        hide_gitignored = true,
+        never_show = {
+          ".angular",
+          ".nx",
+          "build",
+          "coverage",
+          "dist",
+          "node_modules",
+          "vendor",
+        },
       },
     },
     window = {
