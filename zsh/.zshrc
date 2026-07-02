@@ -64,6 +64,8 @@ HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE="$HOME/.zsh_history"
 
+fpath=("${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions" $fpath)
+
 autoload -Uz compinit
 if [[ -f "${ZDOTDIR:-$HOME}/.zcompdump" ]]; then
   compinit -C
@@ -103,6 +105,10 @@ if command -v fzf >/dev/null 2>&1; then
 fi
 unfunction __fzf_restore_options
 
+if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.plugin.zsh" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.plugin.zsh"
+fi
+
 # --------------------------------
 # Prompt
 # --------------------------------
@@ -115,6 +121,18 @@ fi
 # --------------------------------
 if command -v ng >/dev/null 2>&1; then
   source <(ng completion script)
+fi
+
+if command -v docker >/dev/null 2>&1; then
+  source <(docker completion zsh)
+fi
+
+if command -v task >/dev/null 2>&1; then
+  source <(task --completion zsh)
+fi
+
+if command -v npm >/dev/null 2>&1; then
+  source <(npm completion)
 fi
 
 # --------------------------------
