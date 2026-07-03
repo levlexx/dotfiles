@@ -162,6 +162,21 @@ local function location()
   return string.format("%d:%d %d%%%%", line, vim.fn.col("."), progress)
 end
 
+-- Render the status panel at the TOP: the tabline slot is free (no tab pages
+-- used) and accepts the same %-syntax, so it just evaluates mini's content.
+-- The bottom statusline is hidden via laststatus=0 in core/options.lua.
+vim.o.showtabline = 2
+vim.o.tabline = "%!v:lua.MiniStatusline.active()"
+
+-- The tabline does not redraw on cursor/mode events by itself.
+vim.api.nvim_create_autocmd(
+  { "ModeChanged", "CursorMoved", "CursorMovedI", "DiagnosticChanged", "LspAttach", "LspDetach", "BufWritePost" },
+  {
+    group = vim.api.nvim_create_augroup("UserTopStatusline", { clear = true }),
+    command = "redrawtabline",
+  }
+)
+
 statusline.setup({
   use_icons = true,
   content = {
