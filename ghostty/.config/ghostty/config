@@ -1,7 +1,9 @@
 
 theme = Tokyo Night
 font-family = JetBrainsMono Nerd Font
-font-feature = liga=0
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
 font-size = 13
 
 window-padding-x = 10

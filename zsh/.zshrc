@@ -31,6 +31,13 @@ export PATH
 [[ -o interactive ]] || return
 
 # --------------------------------
+# tmux (exec early — the pre-tmux shell skips the rest of init)
+# --------------------------------
+if [[ -z "${TMUX:-}" ]] && command -v tmux >/dev/null 2>&1; then
+  exec tmux new-session -A -s main
+fi
+
+# --------------------------------
 # Ghostty shell integration fallback
 # --------------------------------
 if [[ -n "${GHOSTTY_RESOURCES_DIR:-}" && -f "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration" ]]; then
@@ -57,20 +64,56 @@ setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 setopt SHARE_HISTORY
-setopt APPEND_HISTORY
 setopt EXTENDED_GLOB
 
 HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE="$HOME/.zsh_history"
 
-fpath=("${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions" $fpath)
+# --------------------------------
+# Completions
+# --------------------------------
+# Generated completions are cached and refreshed once a day instead of
+# being regenerated on every shell start (ng/npm spawn Node each time).
+_zsh_comp_cache="$HOME/.cache/zsh/completions"
+mkdir -p "$_zsh_comp_cache"
 
+_cache_comp() {
+  local out="$_zsh_comp_cache/$1"
+  shift
+  if [[ ! -s "$out" || -z $out(#qN.mh-24) ]]; then
+    "$@" >| "$out" 2>/dev/null || rm -f "$out"
+  fi
+}
+
+# docker/task emit fpath-style completion files
+command -v docker >/dev/null 2>&1 && _cache_comp _docker docker completion zsh
+command -v task >/dev/null 2>&1 && _cache_comp _task task --completion zsh
+
+fpath=(
+  "$_zsh_comp_cache"
+  "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-completions"
+  "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh/site-functions"
+  $fpath
+)
+
+# Rebuild the dump when it is older than a day, otherwise trust it.
 autoload -Uz compinit
-if [[ -f "${ZDOTDIR:-$HOME}/.zcompdump" ]]; then
+if [[ -n "${ZDOTDIR:-$HOME}/.zcompdump"(#qN.mh-24) ]]; then
   compinit -C
 else
   compinit
+fi
+
+# npm/ng emit source-style scripts
+if command -v npm >/dev/null 2>&1; then
+  _cache_comp npm.zsh npm completion
+  [[ -s "$_zsh_comp_cache/npm.zsh" ]] && source "$_zsh_comp_cache/npm.zsh"
+fi
+
+if command -v ng >/dev/null 2>&1; then
+  _cache_comp ng.zsh ng completion script
+  [[ -s "$_zsh_comp_cache/ng.zsh" ]] && source "$_zsh_comp_cache/ng.zsh"
 fi
 
 # --------------------------------
@@ -86,6 +129,10 @@ fi
 
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
+fi
+
+if command -v navi >/dev/null 2>&1; then
+  eval "$(navi widget zsh)"
 fi
 
 # fzf restores zsh options verbatim; `zle` is not changeable here.
@@ -114,25 +161,6 @@ fi
 # --------------------------------
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
-fi
-
-# --------------------------------
-# Completions
-# --------------------------------
-if command -v ng >/dev/null 2>&1; then
-  source <(ng completion script)
-fi
-
-if command -v docker >/dev/null 2>&1; then
-  source <(docker completion zsh)
-fi
-
-if command -v task >/dev/null 2>&1; then
-  source <(task --completion zsh)
-fi
-
-if command -v npm >/dev/null 2>&1; then
-  source <(npm completion)
 fi
 
 # --------------------------------
@@ -208,6 +236,13 @@ bindkey '^R' atuin-search-zsh
 # source ~/.autoenv/activate.sh
 # . "$HOME/.moon/bin/env"
 
-if [[ -z "${TMUX:-}" ]] && command -v tmux >/dev/null 2>&1; then
-  exec tmux new-session -A -s main
+# --------------------------------
+# Plugins (syntax highlighting must be sourced last)
+# --------------------------------
+if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
+
+if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi

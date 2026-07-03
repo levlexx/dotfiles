@@ -26,6 +26,20 @@ link() {
   fi
 }
 
+install_brew_packages() {
+  if [[ "${SKIP_BREW:-0}" == "1" ]]; then
+    print "skip brew bundle"
+    return
+  fi
+
+  if ! command -v brew >/dev/null 2>&1; then
+    print -u2 "skip brew bundle: brew is not installed"
+    return
+  fi
+
+  brew bundle --file="$dotfiles_dir/Brewfile"
+}
+
 install_tmux_plugins() {
   if [[ "${SKIP_TMUX_PLUGINS:-0}" == "1" ]]; then
     print "skip tmux plugins"
@@ -59,13 +73,18 @@ link "$dotfiles_dir/zsh/.zshrc" "$HOME/.zshrc"
 link "$dotfiles_dir/tmux/.tmux.conf" "$HOME/.tmux.conf"
 link "$dotfiles_dir/git/.gitconfig" "$HOME/.gitconfig"
 link "$dotfiles_dir/git/.config/git/ignore" "$HOME/.config/git/ignore"
+link "$dotfiles_dir/git/.config/git/hooks/pre-commit" "$HOME/.config/git/hooks/pre-commit"
+link "$dotfiles_dir/git/.config/git/hooks/commit-msg" "$HOME/.config/git/hooks/commit-msg"
+link "$dotfiles_dir/commitlint/.config/commitlint/commitlint.config.mjs" "$HOME/.config/commitlint/commitlint.config.mjs"
 link "$dotfiles_dir/docker/.dockerignore" "$HOME/.dockerignore"
 link "$dotfiles_dir/mise/.config/mise/config.toml" "$HOME/.config/mise/config.toml"
 link "$dotfiles_dir/nvim/.config/nvim" "$HOME/.config/nvim"
 link "$dotfiles_dir/starship/.config/starship.toml" "$HOME/.config/starship.toml"
 link "$dotfiles_dir/lazygit/.config/lazygit" "$HOME/.config/lazygit"
 link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
+link "$dotfiles_dir/vale/.config/vale/.vale.ini" "$HOME/.config/vale/.vale.ini"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
 
+install_brew_packages
 install_tmux_plugins
