@@ -12,8 +12,8 @@ $(printf '%s' "$input" | jq -r '[
   (.cost.total_lines_added // 0),
   (.cost.total_lines_removed // 0),
   (.context_window.total_input_tokens // 0),
-  (.context_window.used_percentage // 0),
-  (.rate_limits.five_hour.used_percentage // ""),
+  (.context_window.used_percentage // 0 | round),
+  (.rate_limits.five_hour.used_percentage // "" | if type == "number" then round else . end),
   (.rate_limits.five_hour.resets_at // "")
 ] | @tsv')
 EOF
