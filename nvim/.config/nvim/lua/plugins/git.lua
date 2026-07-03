@@ -48,4 +48,23 @@ vim.api.nvim_create_autocmd({ "BufReadPre", "BufNewFile" }, {
   callback = setup,
 })
 
+-- Diffview: side-by-side diffs, file history, merge-conflict view
+vim.pack.add({
+  { src = gh("sindrets/diffview.nvim") },
+}, {
+  confirm = false,
+  load = true,
+})
+
+local map = vim.keymap.set
+
+map("n", "<leader>gv", function()
+  if require("diffview.lib").get_current_view() then
+    vim.cmd("DiffviewClose")
+  else
+    vim.cmd("DiffviewOpen")
+  end
+end, { desc = "Toggle diff view" })
+map("n", "<leader>gF", "<cmd>DiffviewFileHistory %<cr>", { desc = "File history (diffview)" })
+
 return M

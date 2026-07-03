@@ -35,3 +35,14 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.spelllang = "en_us"
   end,
 })
+
+-- Refresh Session.vim on exit for projects that opted in (<leader>qS once).
+-- tmux-resurrect's nvim session strategy restores from it after a restart.
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = group,
+  callback = function()
+    if vim.fn.filereadable("Session.vim") == 1 then
+      vim.cmd("mksession! Session.vim")
+    end
+  end,
+})

@@ -142,6 +142,28 @@ also get vale style linting via `vale-ls`.
 | `<leader>xl` | Toggle location list |
 | `<leader>xq` | Toggle quickfix |
 
+### Tests (neotest)
+
+| Key | Action |
+| --- | --- |
+| `<leader>tn` | Run nearest test |
+| `<leader>tf` | Run current file |
+| `<leader>ta` | Run all tests |
+| `<leader>ts` | Toggle summary tree |
+| `<leader>to` | Toggle output panel |
+| `<leader>tw` | Watch current file |
+| `<leader>tg` | `go test ./...` in terminal |
+
+### Editing extras
+
+| Key | Action |
+| --- | --- |
+| `sa` / `sd` / `sr` | Add / delete / replace surrounding (mini.surround) |
+| `<leader>fR` | Project-wide find & replace (grug-far) |
+| `]t` / `[t` | Next / previous TODO comment |
+| `<leader>gv` | Toggle diff view |
+| `<leader>gF` | File history (diffview) |
+
 ### Buffers / Windows / Terminal
 
 | Key | Action |
@@ -157,7 +179,7 @@ also get vale style linting via `vale-ls`.
 | `<leader>tt` | Terminal |
 | `<leader>tv` | Vertical terminal |
 | `<leader>tg` | `go test ./...` |
-| `<leader>qS` | Save `Session.vim` |
+| `<leader>qS` | Save `Session.vim` (opts project into auto-refresh on exit) |
 | `<leader>qs` | Restore `Session.vim` |
 
 ### UI / Agents

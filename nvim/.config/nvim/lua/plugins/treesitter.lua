@@ -1,7 +1,34 @@
-local ok, treesitter = pcall(require, "nvim-treesitter.configs")
+-- nvim-treesitter main branch: rolling grammars, no configs.setup().
+-- Parsers are installed once via `install()`; highlighting/indent start
+-- per buffer from the FileType autocmd below.
+local ok, treesitter = pcall(require, "nvim-treesitter")
 if not ok then
   return
 end
+
+local parsers = {
+  "bash",
+  "dockerfile",
+  "go",
+  "gomod",
+  "gosum",
+  "gowork",
+  "http",
+  "javascript",
+  "json",
+  "lua",
+  "markdown",
+  "markdown_inline",
+  "sql",
+  "tsx",
+  "typespec",
+  "typescript",
+  "vim",
+  "vimdoc",
+  "yaml",
+}
+
+treesitter.install(parsers)
 
 local function is_large_buffer(bufnr)
   local max_size = 256 * 1024
@@ -12,40 +39,16 @@ local function is_large_buffer(bufnr)
   return (stats ~= nil and stats.size > max_size) or vim.api.nvim_buf_line_count(bufnr) > max_lines
 end
 
-treesitter.setup({
-  ensure_installed = {
-    "bash",
-    "dockerfile",
-    "go",
-    "gomod",
-    "gosum",
-    "gowork",
-    "http",
-    "javascript",
-    "json",
-    "jsonc",
-    "lua",
-    "markdown",
-    "markdown_inline",
-    "sql",
-    "tsx",
-    "typespec",
-    "typescript",
-    "vim",
-    "vimdoc",
-    "yaml",
-  },
-  auto_install = false,
-  highlight = {
-    enable = true,
-    disable = function(_, bufnr)
-      return is_large_buffer(bufnr)
-    end,
-  },
-  indent = {
-    enable = true,
-    disable = function(_, bufnr)
-      return is_large_buffer(bufnr)
-    end,
-  },
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true }),
+  callback = function(event)
+    if is_large_buffer(event.buf) then
+      return
+    end
+    -- no-op for filetypes without an installed parser
+    if not pcall(vim.treesitter.start, event.buf) then
+      return
+    end
+    vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
 })

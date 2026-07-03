@@ -13,3 +13,8 @@ local pairs_ok, pairs = pcall(require, "mini.pairs")
 if pairs_ok then
   pairs.setup()
 end
+
+local surround_ok, surround = pcall(require, "mini.surround")
+if surround_ok then
+  surround.setup()
+end
