@@ -15,9 +15,10 @@ $(printf '%s' "$input" | jq -r '[
 EOF
 
 # Tokyo Night
-BLUE="122;162;247"   # #7aa2f7
+BLUE="122;162;247"      # #7aa2f7 (accents)
+BLUE_BG="61;89;161"     # #3d59a1 (model capsule)
 INK="26;27;38"       # #1a1b26
-DARK="41;46;66"      # #292e42
+DARK="31;35;53"      # #1f2335
 FG="192;202;245"     # #c0caf5
 GREEN="158;206;106"  # #9ece6a
 RED="247;118;142"    # #f7768e
@@ -34,7 +35,7 @@ capsule() {
 fg() { printf '\033[38;2;%sm' "$1"; }
 
 # ── model ────────────────────────────────────────────────────────────
-out="$(capsule "$BLUE" "$(fg "$INK")\033[1m✳ ${model}")"
+out="$(capsule "$BLUE_BG" "$(fg "$FG")\033[1m✳ ${model}")"
 
 # ── directory ────────────────────────────────────────────────────────
 short_dir="${dir/#$HOME/\~}"
