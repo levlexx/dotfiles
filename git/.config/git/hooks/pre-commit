@@ -1,0 +1,19 @@
+#!/bin/sh
+# Global pre-commit: spell-check staged files with typos, then chain to the
+# repo's own hook. Skip everything with --no-verify.
+set -u
+
+if command -v typos >/dev/null 2>&1; then
+  if ! git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 typos --; then
+    echo >&2 "typos: spelling errors in staged files (fix or commit with --no-verify)"
+    exit 1
+  fi
+fi
+
+# Chain to the repository's local hook if it exists. Note: --git-dir, NOT
+# --git-path hooks — the latter resolves core.hooksPath back to this script
+# and recurses forever.
+local_hook="$(git rev-parse --git-dir)/hooks/pre-commit"
+if [ -x "$local_hook" ] && [ ! "$local_hook" -ef "$0" ]; then
+  exec "$local_hook" "$@"
+fi
