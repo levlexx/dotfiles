@@ -10,7 +10,7 @@ Status: approved
    locations assume an npm-global layout; with mise shims they resolve to
    garbage paths, so `@angular/language-service` is never found. Symptoms:
    eternal "initializing" fidget popup, no template intellisense, lag from
-   restart noise. vtsls itself is healthy (ready in ~1s in project-a/client).
+   restart noise. vtsls itself is healthy (ready in ~1s in a real workspace).
 2. neo-tree is heavy (drags in plenary + nui) and slower than needed.
 3. No HTTP client, no discoverable cheatsheets (nvim partially via which-key,
    tmux none, shell none), no prose linting, no commit hygiene enforcement.
@@ -93,8 +93,8 @@ Override `cmd` with `--tsProbeLocations`/`--ngProbeLocations` set to:
 ## Verification
 
 - Headless nvim: config loads clean; oil/kulala/harper configs load.
-- Regression test: angularls attaches AND reaches `initialized` in
-  `~/Projects/project-a/client`.
+- Regression test: angularls attaches AND reaches `initialized` in a real
+  local Angular workspace.
 - tmux: config loads on a scratch server; TPM plugin installs.
 - Hooks: fixture repo — bad commit message rejected, good accepted; staged
   typo rejected; chaining to a local hook works; `--no-verify` bypasses.
@@ -102,7 +102,7 @@ Override `cmd` with `--tsProbeLocations`/`--ngProbeLocations` set to:
 
 ## Out of scope
 
-- project-b/frontend has no node_modules — LSP can't work there until
+- Workspaces without node_modules — LSP can't work there until
   `npm install` (user action).
 - Per-project vale style packages (`vale sync`) — user configures per docs
   project.
