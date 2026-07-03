@@ -6,7 +6,10 @@ go = "1.26.4"
 "npm:@vtsls/language-server" = "0.3.0"
 "npm:@angular/language-server" = "22.0.4"
 "npm:@typespec/compiler" = "1.13.0"
-"npm:tree-sitter-cli" = "0.26.9"
+# GitHub release binary via ubi (handles the .gz single-binary asset and the
+# exec bit): the npm package needs a postinstall-downloaded native binary that
+# breaks on machines with stale system-node globals
+"ubi:tree-sitter/tree-sitter" = { version = "0.26.9", exe = "tree-sitter" }
 "npm:vscode-langservers-extracted" = "4.10.0"
 "npm:yaml-language-server" = "1.23.0"
 "npm:dockerfile-language-server-nodejs" = "0.15.0"
