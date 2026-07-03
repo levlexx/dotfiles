@@ -4,20 +4,24 @@ set -u
 
 input=$(cat)
 
-IFS=$'\t' read -r model dir cost added removed <<EOF
+IFS=$'\t' read -r model effort cost added removed ctx_tokens ctx_pct rl_pct rl_reset <<EOF
 $(printf '%s' "$input" | jq -r '[
   (.model.display_name // "Claude"),
-  (.workspace.current_dir // .cwd // ""),
+  (.effort.level // "-"),
   (.cost.total_cost_usd // 0),
   (.cost.total_lines_added // 0),
-  (.cost.total_lines_removed // 0)
+  (.cost.total_lines_removed // 0),
+  (.context_window.total_input_tokens // 0),
+  (.context_window.used_percentage // 0),
+  (.rate_limits.five_hour.used_percentage // ""),
+  (.rate_limits.five_hour.resets_at // "")
 ] | @tsv')
 EOF
 
 # Tokyo Night
+CYAN="125;207;255"      # #7dcfff
 BLUE="122;162;247"      # #7aa2f7 (accents)
 BLUE_BG="61;89;161"     # #3d59a1 (model capsule)
-INK="26;27;38"       # #1a1b26
 DARK="31;35;53"      # #1f2335
 FG="192;202;245"     # #c0caf5
 GREEN="158;206;106"  # #9ece6a
@@ -34,21 +38,40 @@ capsule() {
 
 fg() { printf '\033[38;2;%sm' "$1"; }
 
-# ── model ────────────────────────────────────────────────────────────
-out="$(capsule "$BLUE_BG" "$(fg "$FG")\033[1m✳ ${model}")"
+# green under 70%, yellow under 90%, red above
+pct_color() {
+  if [ "${1:-0}" -ge 90 ]; then
+    printf '%s' "$RED"
+  elif [ "${1:-0}" -ge 70 ]; then
+    printf '%s' "$YELLOW"
+  else
+    printf '%s' "$GREEN"
+  fi
+}
 
-# ── directory ────────────────────────────────────────────────────────
-short_dir="${dir/#$HOME/\~}"
-short_dir="${short_dir##*/}"
-[ -z "$short_dir" ] && short_dir="~"
-out="$out $(capsule "$DARK" "$(fg "$BLUE")󰉋 $(fg "$FG")${short_dir}")"
+# 280433 → 280k, 1234567 → 1.2M
+humanize() {
+  awk -v n="$1" 'BEGIN {
+    if (n >= 1000000) printf "%.1fM", n / 1000000
+    else if (n >= 1000) printf "%dk", n / 1000
+    else printf "%d", n
+  }'
+}
 
-# ── git branch ───────────────────────────────────────────────────────
-branch=$(git -C "$dir" branch --show-current 2>/dev/null)
-if [ -n "$branch" ]; then
-  dirty=""
-  [ -n "$(git -C "$dir" status --porcelain 2>/dev/null | head -c1)" ] && dirty=" $(fg "$YELLOW")●"
-  out="$out $(capsule "$DARK" "$(fg "$BLUE") $(fg "$FG")${branch}${dirty}")"
+# ── model + effort ───────────────────────────────────────────────────
+model_body="$(fg "$FG")\033[1m✳ ${model}"
+[ "$effort" != "-" ] && model_body="$model_body\033[22m $(fg "$CYAN")${effort}"
+out="$(capsule "$BLUE_BG" "$model_body")"
+
+# ── context tokens used ──────────────────────────────────────────────
+if [ "$ctx_tokens" != "0" ]; then
+  out="$out $(capsule "$DARK" "$(fg "$BLUE")󰊠 $(fg "$FG")$(humanize "$ctx_tokens") $(fg "$(pct_color "$ctx_pct")")${ctx_pct}%")"
+fi
+
+# ── 5h session window: used % + reset time ───────────────────────────
+if [ -n "$rl_reset" ]; then
+  reset_time=$(date -r "$rl_reset" +%H:%M 2>/dev/null || echo "?")
+  out="$out $(capsule "$DARK" "$(fg "$BLUE")󰥔 $(fg "$(pct_color "$rl_pct")")${rl_pct}% $(fg "$FG")↻ ${reset_time}")"
 fi
 
 # ── session: lines changed + cost ────────────────────────────────────
