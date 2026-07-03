@@ -84,7 +84,6 @@ link "$dotfiles_dir/lazygit/.config/lazygit" "$HOME/.config/lazygit"
 link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
 link "$dotfiles_dir/vale/.config/vale/.vale.ini" "$HOME/.config/vale/.vale.ini"
 link "$dotfiles_dir/claude/.claude/statusline.sh" "$HOME/.claude/statusline.sh"
-link "$dotfiles_dir/bin/herd" "$HOME/.local/bin/herd"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
 
