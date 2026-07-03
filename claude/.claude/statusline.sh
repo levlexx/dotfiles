@@ -20,13 +20,15 @@ EOF
 
 # Tokyo Night
 CYAN="125;207;255"      # #7dcfff
-BLUE="122;162;247"      # #7aa2f7 (accents)
-BLUE_BG="61;89;161"     # #3d59a1 (model capsule)
-DARK="31;35;53"      # #1f2335
-FG="192;202;245"     # #c0caf5
-GREEN="158;206;106"  # #9ece6a
-RED="247;118;142"    # #f7768e
-YELLOW="224;175;104" # #e0af68
+BLUE="122;162;247"      # #7aa2f7 (accents / icon color)
+BLUE_BG="122;162;247"   # #7aa2f7 (model pill bg)
+MODEL_FG="22;22;30"     # #16161e (bold text on bright model pill)
+DARK="41;46;66"         # #292e42 (dark pill bg)
+FG="192;202;245"        # #c0caf5
+MUTED="169;177;214"     # #a9b1d6 (lines/cost default fg)
+GREEN="158;206;106"     # #9ece6a
+RED="247;118;142"       # #f7768e
+YELLOW="224;175;104"    # #e0af68
 
 # capsule <bg> <body...>  →  rounded pill like the tmux status bar
 # (\356\202\266 / \356\202\264 are the U+E0B6 / U+E0B4 half-circle caps)
@@ -59,8 +61,8 @@ humanize() {
 }
 
 # ── model + effort ───────────────────────────────────────────────────
-model_body="$(fg "$FG")\033[1m✳ ${model}"
-[ "$effort" != "-" ] && model_body="$model_body\033[22m $(fg "$CYAN")${effort}"
+model_body="$(fg "$MODEL_FG")\033[1m✳ ${model}"
+[ "$effort" != "-" ] && model_body="$model_body\033[22m $(fg "$MODEL_FG")${effort}"
 out="$(capsule "$BLUE_BG" "$model_body")"
 
 # ── context tokens used ──────────────────────────────────────────────
@@ -71,7 +73,7 @@ fi
 # ── 5h session window: used % + reset time ───────────────────────────
 if [ -n "$rl_reset" ]; then
   reset_time=$(date -r "$rl_reset" +%H:%M 2>/dev/null || echo "?")
-  out="$out $(capsule "$DARK" "$(fg "$BLUE")󰥔 $(fg "$(pct_color "$rl_pct")")${rl_pct}% $(fg "$FG")↻ ${reset_time}")"
+  out="$out $(capsule "$DARK" "$(fg "$BLUE")󰥔 $(fg "$(pct_color "$rl_pct")")${rl_pct}% $(fg "$CYAN")↻ ${reset_time}")"
 fi
 
 # ── session: lines changed + cost ────────────────────────────────────
@@ -80,7 +82,7 @@ if [ "$added" != "0" ] || [ "$removed" != "0" ]; then
   session="$(fg "$GREEN")+${added} $(fg "$RED")-${removed}"
 fi
 cost_fmt=$(printf '$%.2f' "$cost" 2>/dev/null || echo '$0.00')
-[ "$cost_fmt" != '$0.00' ] && session="${session:+$session }$(fg "$YELLOW")${cost_fmt}"
+[ "$cost_fmt" != '$0.00' ] && session="${session:+$session }$(fg "$MUTED")${cost_fmt}"
 [ -n "$session" ] && out="$out $(capsule "$DARK" "$session")"
 
 printf '%b' "$out"
