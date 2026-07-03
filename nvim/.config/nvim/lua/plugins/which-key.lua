@@ -19,6 +19,7 @@ which_key.add({
   { "<leader>f", group = "Find / search" },
   { "<leader>g", group = "Git" },
   { "<leader>gh", group = "Git hunks" },
+  { "<leader>D", group = "Database" },
   { "<leader>c", group = "Code / LSP" },
   { "<leader>d", group = "Debug" },
   { "<leader>b", group = "Buffers" },

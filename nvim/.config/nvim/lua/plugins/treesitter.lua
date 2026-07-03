@@ -26,6 +26,7 @@ treesitter.setup({
     "lua",
     "markdown",
     "markdown_inline",
+    "sql",
     "tsx",
     "typespec",
     "typescript",

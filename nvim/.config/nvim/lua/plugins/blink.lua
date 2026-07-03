@@ -39,7 +39,16 @@ blink.setup({
   },
   sources = {
     default = { "lsp", "path", "snippets", "buffer" },
+    per_filetype = {
+      mysql = { "snippets", "dadbod", "buffer" },
+      plsql = { "snippets", "dadbod", "buffer" },
+      sql = { "snippets", "dadbod", "buffer" },
+    },
     providers = {
+      dadbod = {
+        name = "Dadbod",
+        module = "vim_dadbod_completion.blink",
+      },
       lsp = {
         score_offset = 8,
       },
