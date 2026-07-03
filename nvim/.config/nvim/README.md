@@ -6,7 +6,7 @@ Minimal Neovim 0.12+ configuration using `vim.pack`.
 
 | Feature | Implementation |
 | --- | --- |
-| Explorer | `neo-tree.nvim` |
+| Explorer | `oil.nvim` |
 | Statusline | `mini.statusline` |
 | Dashboard | `alpha.nvim` |
 | Notifications | `fidget.nvim` |
@@ -16,21 +16,20 @@ Explorer keys:
 
 | Key | Action |
 | --- | --- |
-| `<leader>e` | Toggle explorer and reveal current file |
-| `<leader>fe` | Reveal current file in explorer |
+| `-` | Edit parent directory of current file |
+| `<leader>e` | Floating explorer at current file |
 | `<leader>fE` | Open explorer at cwd |
 
-Neo-tree file operations:
+oil edits directories like text buffers — file operations are vim edits:
 
 | Key | Action |
 | --- | --- |
-| `a` | Add file or directory |
-| `r` | Rename |
-| `m` | Move |
-| `d` | Delete |
-| `y` | Copy to clipboard |
-| `p` | Paste from clipboard |
-| `R` | Refresh |
+| add a line | Create file (`name/` creates a directory) |
+| edit a line + `:w` | Rename / move |
+| `dd` + `:w` | Delete |
+| `-` | Go up a directory |
+| `<CR>` | Open file / enter directory |
+| `g?` | All oil keymaps |
 
 ## Keybindings
 
@@ -49,6 +48,8 @@ Neo-tree file operations:
 | `<leader>u` | UI toggles |
 | `<leader>a` | AI / agents |
 | `<leader>d` | Debug |
+| `<leader>D` | Database |
+| `<leader>R` | REST / HTTP |
 
 ### Find / Search
 
@@ -56,8 +57,7 @@ Neo-tree file operations:
 | --- | --- |
 | `<leader><space>` | Find files |
 | `<leader>/` | Live grep |
-| `<leader>e` | Explorer |
-| `<leader>fe` | Reveal file in explorer |
+| `<leader>e` | Explorer (float) |
 | `<leader>fE` | Explorer cwd |
 | `<leader>ff` | Find files |
 | `<leader>fg` | Find git files |
@@ -108,6 +108,26 @@ Neo-tree file operations:
 | `<leader>cs` | Document symbols |
 | `<leader>cS` | Workspace symbols |
 | `<leader>cf` | Format |
+
+### HTTP client (kulala)
+
+Open a `.http` file (or `<leader>Ro` for a scratchpad), put the cursor on a
+request, and:
+
+| Key | Action |
+| --- | --- |
+| `<leader>Rs` | Send request under cursor |
+| `<leader>Ra` | Send all requests in buffer |
+| `<leader>Rr` | Replay last request |
+| `<leader>Re` | Select environment |
+| `<leader>Rt` | Toggle body / headers view |
+| `<leader>Ro` | Scratchpad |
+
+### Prose
+
+`markdown` and `gitcommit` buffers get built-in `spell` (`]s` / `[s` navigate,
+`z=` suggests) and harper-ls grammar diagnostics. Projects with a `.vale.ini`
+also get vale style linting via `vale-ls`.
 
 ### Diagnostics
 

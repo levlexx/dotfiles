@@ -223,9 +223,29 @@ vim.lsp.config("vtsls", {
   },
 })
 
+-- lspconfig's default probe locations assume an npm-global layout and resolve
+-- to garbage with mise shims, crashing ngserver on startup. Point the probes at
+-- the mise install (bundles @angular/language-service + typescript). The
+-- project's own node_modules is probed first so a version-matched
+-- language-service wins over the global one.
+local function angular_cmd()
+  local installs = vim.fn.glob(
+    "~/.local/share/mise/installs/npm-angular-language-server/*/lib/node_modules/@angular/language-server/node_modules",
+    true,
+    true
+  )
+  if #installs == 0 then
+    return nil
+  end
+
+  local probes = table.concat({ vim.uv.cwd() .. "/node_modules", installs[#installs] }, ",")
+  return { "ngserver", "--stdio", "--tsProbeLocations", probes, "--ngProbeLocations", probes }
+end
+
 vim.lsp.config("angularls", {
   capabilities = capabilities,
   root_dir = angular_root_dir,
+  cmd = angular_cmd(),
 })
 
 vim.lsp.config("tsp_server", {
@@ -253,6 +273,31 @@ vim.lsp.config("yamlls", {
   },
 })
 
+vim.lsp.config("harper_ls", {
+  capabilities = capabilities,
+  filetypes = { "markdown", "gitcommit" },
+  settings = {
+    ["harper-ls"] = {
+      linters = {
+        -- conventional commit subjects are lowercase; capitalization
+        -- nagging on every commit is noise
+        SentenceCapitalization = false,
+      },
+    },
+  },
+})
+
+-- vale only in projects that opted in with a .vale.ini
+vim.lsp.config("vale_ls", {
+  capabilities = capabilities,
+  root_dir = function(bufnr, on_dir)
+    local root = vim.fs.root(vim.api.nvim_buf_get_name(bufnr), { ".vale.ini" })
+    if root then
+      on_dir(root)
+    end
+  end,
+})
+
 vim.lsp.config("dockerls", {
   capabilities = capabilities,
 })
@@ -269,6 +314,8 @@ vim.lsp.enable({
   "tsp_server",
   "jsonls",
   "yamlls",
+  "harper_ls",
+  "vale_ls",
   "dockerls",
   "docker_compose_language_service",
 })

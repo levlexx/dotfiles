@@ -5,7 +5,10 @@ end
 
 which_key.setup({
   preset = "helix",
-  delay = 300,
+  delay = function(ctx)
+    return ctx.plugin and 0 or 200
+  end,
+  expand = 1,
   win = {
     border = "rounded",
     padding = { 1, 2 },
@@ -26,6 +29,7 @@ which_key.add({
   { "<leader>w", group = "Windows" },
   { "<leader>t", group = "Terminal / tests" },
   { "<leader>n", group = "Nx" },
+  { "<leader>R", group = "REST" },
   { "<leader>x", group = "Diagnostics" },
   { "<leader>q", group = "Quit / session" },
   { "<leader>u", group = "UI toggles" },

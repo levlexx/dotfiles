@@ -2,106 +2,44 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 local M = {}
-local configured = false
 local gh = function(repo)
   return "https://github.com/" .. repo
 end
 
-local function setup()
-  if configured then
-    return
-  end
-  configured = true
+vim.pack.add({
+  { src = gh("stevearc/oil.nvim"), version = vim.version.range("2") },
+}, {
+  confirm = false,
+  load = true,
+})
 
-  vim.pack.add({
-    { src = gh("nvim-neo-tree/neo-tree.nvim"), version = vim.version.range("3") },
-    { src = gh("nvim-lua/plenary.nvim") },
-    { src = gh("MunifTanjim/nui.nvim") },
-  }, {
-    confirm = false,
-    load = true,
-  })
+require("oil").setup({
+  default_file_explorer = true,
+  skip_confirm_for_simple_edits = true,
+  watch_for_changes = true,
+  view_options = {
+    show_hidden = true,
+    is_always_hidden = function(name)
+      return name == ".git" or name == ".DS_Store"
+    end,
+  },
+  float = {
+    max_width = 0.6,
+    max_height = 0.7,
+    border = "rounded",
+  },
+})
 
-  require("neo-tree").setup({
-    close_if_last_window = false,
-    enable_diagnostics = true,
-    enable_git_status = true,
-    popup_border_style = "rounded",
-    default_component_configs = {
-      indent = {
-        with_expanders = true,
-        expander_collapsed = "",
-        expander_expanded = "",
-      },
-      modified = { symbol = "●" },
-      git_status = {
-        symbols = {
-          added = "󰐕",
-          deleted = "󰍵",
-          modified = "󰜥",
-          renamed = "󰁕",
-          untracked = "󰋗",
-          ignored = "󰈉",
-          unstaged = "󰄱",
-          staged = "󰱒",
-          conflict = "󰀦",
-        },
-      },
-      diagnostics = {
-        symbols = {
-          hint = "󰌶",
-          info = "󰋽",
-          warn = "󰀪",
-          error = "󰅚",
-        },
-      },
-    },
-    filesystem = {
-      bind_to_cwd = false,
-      follow_current_file = {
-        enabled = true,
-        leave_dirs_open = false,
-      },
-      use_libuv_file_watcher = false,
-      filtered_items = {
-        hide_dotfiles = false,
-        hide_gitignored = true,
-        never_show = {
-          ".angular",
-          ".nx",
-          "build",
-          "coverage",
-          "dist",
-          "node_modules",
-          "vendor",
-        },
-      },
-    },
-    window = {
-      position = "left",
-      width = 34,
-    },
-  })
+function M.parent()
+  require("oil").open()
 end
 
-local function execute(opts)
-  setup()
-  require("neo-tree.command").execute(vim.tbl_extend("force", {
-    source = "filesystem",
-    position = "left",
-  }, opts or {}))
-end
-
-function M.toggle()
-  execute({ toggle = true, reveal = true })
-end
-
-function M.reveal()
-  execute({ action = "focus", reveal = true })
+function M.toggle_float()
+  require("oil").toggle_float()
 end
 
 function M.cwd()
-  execute({ action = "focus", dir = vim.uv.cwd() })
+  require("oil").open(vim.uv.cwd())
 end
 
 return M

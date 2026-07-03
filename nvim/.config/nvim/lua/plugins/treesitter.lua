@@ -20,6 +20,7 @@ treesitter.setup({
     "gomod",
     "gosum",
     "gowork",
+    "http",
     "javascript",
     "json",
     "jsonc",
