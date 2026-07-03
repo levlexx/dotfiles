@@ -220,6 +220,8 @@ alias gsquash='git rebase -i --autosquash'
 alias gconflict='git diff --name-only --diff-filter=U'
 
 alias v='nvim'
+alias vi='nvim'
+alias vim='nvim'
 alias ..='cd ..'
 alias ...='cd ../..'
 
