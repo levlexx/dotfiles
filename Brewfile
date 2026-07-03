@@ -1,6 +1,7 @@
 tap "pyroscope-io/brew"
 
 cask "ghostty"
+cask "gcloud-cli"
 
 brew "atuin"
 brew "bat"
@@ -9,7 +10,9 @@ brew "eza"
 brew "fd"
 brew "fzf"
 brew "fzf-tab"
+brew "gh"
 brew "git-delta"
+brew "jq"
 brew "mise"
 brew "navi"
 brew "neovim"

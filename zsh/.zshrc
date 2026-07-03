@@ -105,6 +105,12 @@ else
   compinit
 fi
 
+# Google Cloud SDK: PATH + completions
+if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/google-cloud-sdk/path.zsh.inc" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/google-cloud-sdk/path.zsh.inc"
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/google-cloud-sdk/completion.zsh.inc"
+fi
+
 # npm/ng emit source-style scripts
 if command -v npm >/dev/null 2>&1; then
   _cache_comp npm.zsh npm completion
