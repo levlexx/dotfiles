@@ -193,6 +193,14 @@ if ! command -v cc >/dev/null 2>&1; then
   exit 1
 fi
 
+# nvim-treesitter main builds with the tree-sitter CLI; a stale npm-global
+# shim (node /lib/node_modules/...) breaks with ENOENT
+if ! tree-sitter --version >/dev/null 2>&1; then
+  echo "error: tree-sitter CLI missing or broken ($(command -v tree-sitter || echo 'not on PATH'))" >&2
+  echo "fix: mise install   (provides npm:tree-sitter-cli)" >&2
+  exit 1
+fi
+
 rm -rf "$HOME/.local/share/nvim/site/parser" "$HOME/.local/share/nvim/site/queries"
 
 nvim --headless \
