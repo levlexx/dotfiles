@@ -183,6 +183,25 @@ else
 fi
 '''
 
+[tasks.nvim-parsers]
+description = "Rebuild all Neovim treesitter parsers from scratch (fixes 'Error during tree-sitter build' after branch/grammar changes)"
+run = '''
+set -eu
+
+if ! command -v cc >/dev/null 2>&1; then
+  echo "error: no C compiler; run: xcode-select --install" >&2
+  exit 1
+fi
+
+rm -rf "$HOME/.local/share/nvim/site/parser" "$HOME/.local/share/nvim/site/queries"
+
+nvim --headless \
+  "+lua require('nvim-treesitter').install(require('plugins.treesitter').parsers):wait(600000)" \
+  +qa
+
+echo "parsers rebuilt; kulala installs its own on next nvim start"
+'''
+
 [tasks.nvim-startuptime]
 description = "Measure Neovim startup time"
 run = '''

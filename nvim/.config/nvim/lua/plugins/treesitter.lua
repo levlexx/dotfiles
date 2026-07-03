@@ -1,9 +1,11 @@
 -- nvim-treesitter main branch: rolling grammars, no configs.setup().
 -- Parsers are installed once via `install()`; highlighting/indent start
 -- per buffer from the FileType autocmd below.
+local M = {}
+
 local ok, treesitter = pcall(require, "nvim-treesitter")
 if not ok then
-  return
+  return M
 end
 
 local parsers = {
@@ -27,6 +29,8 @@ local parsers = {
   "vimdoc",
   "yaml",
 }
+
+M.parsers = parsers
 
 treesitter.install(parsers)
 
@@ -52,3 +56,5 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end,
 })
+
+return M
