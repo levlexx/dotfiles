@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# herd — manage AI agent windows in a dedicated tmux session.
+# Windows self-report state in their name via Claude Code hooks:
+#   ▶ running   ⏸ needs input   ✓ done
+set -euo pipefail
+
+SESSION="herd"
+
+usage() {
+  cat <<'USAGE'
+herd — agent windows in a tmux session
+
+  herd add <name> <dir> [cmd...]   new agent window in <dir> (default cmd: claude)
+  herd ls                          list herd windows with state flags
+  herd peek <name>                 last 40 lines of an agent's pane
+  herd pick                        fzf picker with live preview (tmux prefix+A)
+  herd mark <run|pause|done>       set state prefix on current window (used by hooks)
+USAGE
+  exit 1
+}
+
+ensure_session() {
+  tmux has-session -t "=$SESSION" 2>/dev/null && return
+  tmux new-session -d -s "$SESSION" -n shell
+}
+
+strip_state() {
+  local name="$1"
+  name="${name#▶ }"
+  name="${name#⏸ }"
+  name="${name#✓ }"
+  printf '%s' "$name"
+}
+
+# index of the window whose name matches (state prefixes ignored)
+find_window() {
+  local want="$1" idx name
+  while IFS=$'\t' read -r idx name; do
+    if [ "$(strip_state "$name")" = "$want" ]; then
+      printf '%s' "$idx"
+      return 0
+    fi
+  done < <(tmux list-windows -t "=$SESSION" -F $'#{window_index}\t#{window_name}')
+  echo >&2 "herd: no window named '$want' in session '$SESSION'"
+  return 1
+}
+
+cmd="${1:-}"
+[ -n "$cmd" ] || usage
+shift
+
+case "$cmd" in
+  add)
+    name="${1:?usage: herd add <name> <dir> [cmd...]}"
+    dir="${2:?usage: herd add <name> <dir> [cmd...]}"
+    shift 2
+    run="${*:-claude}"
+    ensure_session
+    tmux new-window -d -t "=$SESSION" -n "$name" -c "$dir" "$run"
+    # agent-state monitors are per herd window so ordinary windows
+    # don't get flagged for being idle
+    tmux set-option -w -t "=$SESSION:$name" monitor-bell on
+    tmux set-option -w -t "=$SESSION:$name" monitor-silence 30
+    tmux set-option -w -t "=$SESSION:$name" automatic-rename off
+    echo "herd: added '$name' ($run) in $dir"
+    ;;
+
+  ls)
+    tmux list-windows -t "=$SESSION" \
+      -F '#{window_index}: #{window_name}#{?window_bell_flag,  [blocked],}#{?window_silence_flag,  [quiet],}#{?window_active,  [active],}'
+    ;;
+
+  peek)
+    name="${1:?usage: herd peek <name>}"
+    idx=$(find_window "$name")
+    tmux capture-pane -ep -t "=$SESSION:$idx" | tail -40
+    ;;
+
+  pick)
+    sel=$(tmux list-windows -t "=$SESSION" \
+        -F '#{window_index} #{?window_bell_flag,⏰ ,}#{window_name}' 2>/dev/null \
+      | fzf --no-sort \
+            --prompt='herd> ' \
+            --preview "tmux capture-pane -ep -t '=$SESSION:'{1} | tail -40" \
+            --preview-window=right,65%) || exit 0
+    tmux switch-client -t "=$SESSION:${sel%% *}"
+    ;;
+
+  mark)
+    state="${1:-run}"
+    [ -n "${TMUX_PANE:-}" ] || exit 0
+    case "$state" in
+      run) sym="▶" ;;
+      pause) sym="⏸" ;;
+      done) sym="✓" ;;
+      *) echo >&2 "herd: unknown state '$state'"; exit 1 ;;
+    esac
+    name=$(tmux display-message -p -t "$TMUX_PANE" '#{window_name}')
+    tmux rename-window -t "$TMUX_PANE" "$sym $(strip_state "$name")"
+    ;;
+
+  *)
+    usage
+    ;;
+esac
