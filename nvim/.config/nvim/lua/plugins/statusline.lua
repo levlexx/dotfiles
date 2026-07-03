@@ -134,6 +134,21 @@ local function formatter_status()
   return "fmt " .. table.concat(names, ",")
 end
 
+-- short oil directory: ~-relative, middle components shortened when long
+local function oil_path()
+  local ok, oil = pcall(require, "oil")
+  local dir = ok and oil.get_current_dir() or nil
+  if not dir then
+    return "oil"
+  end
+
+  dir = vim.fn.fnamemodify(dir, ":~")
+  if #dir > 45 then
+    dir = vim.fn.pathshorten(dir, 2)
+  end
+  return dir
+end
+
 local function filename()
   local name = vim.fn.expand("%:~:.")
   if name == "" then
@@ -195,10 +210,18 @@ statusline.setup({
         capsule(location(), mode_group, mode_cap),
       })
 
-      return left .. "%< %#NvimSLFile#  " .. filename() .. " %*%=" .. right
+      local file_section
+      if vim.bo.filetype == "oil" then
+        file_section = " " .. capsule("󰉋 " .. oil_path(), "NvimSLSurface", "NvimSLSurfaceCap")
+      else
+        file_section = " %#NvimSLFile#  " .. filename() .. " %*"
+      end
+
+      return left .. "%<" .. file_section .. "%=" .. right
     end,
     inactive = function()
-      return "%#NvimSLInactive# " .. filename() .. "%=" .. location() .. " %*"
+      local name = vim.bo.filetype == "oil" and ("󰉋 " .. oil_path()) or filename()
+      return "%#NvimSLInactive# " .. name .. "%=" .. location() .. " %*"
     end,
   },
 })
