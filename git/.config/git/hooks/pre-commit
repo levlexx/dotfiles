@@ -4,7 +4,9 @@
 set -u
 
 if command -v typos >/dev/null 2>&1; then
-  if ! git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 typos --; then
+  # --force-exclude keeps the repo's typos excludes (e.g. binary assets)
+  # effective even though paths are passed explicitly.
+  if ! git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 typos --force-exclude --; then
     echo >&2 "typos: spelling errors in staged files (fix or commit with --no-verify)"
     exit 1
   fi
