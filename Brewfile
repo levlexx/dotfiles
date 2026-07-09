@@ -23,6 +23,8 @@ brew "pyroscope-io/brew/pyroscope"
 brew "ripgrep"
 brew "starship"
 brew "stern"
+# clickable macOS notifications for the claude-usage tmux plugin
+brew "terminal-notifier"
 brew "tmux"
 brew "vale"
 brew "yazi"

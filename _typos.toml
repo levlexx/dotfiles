@@ -1,0 +1,3 @@
+[files]
+# binary icons trip the spell-checker
+extend-exclude = ["tmux/claude-usage/assets/"]

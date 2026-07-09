@@ -26,6 +26,74 @@ link() {
   fi
 }
 
+# Wire Claude Code into the tmux claude-usage plugin: the statusLine slot
+# runs the silent harvester that feeds the usage capsule, and hooks stamp the
+# per-window work state (working/done ✳) shown in the window tabs.
+configure_claude_settings() {
+  local settings="$HOME/.claude/settings.json"
+  local harvester="$HOME/.tmux/claude-usage/scripts/harvester.sh"
+  local state="$HOME/.tmux/claude-usage/scripts/state.sh"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    print -u2 "skip claude settings: jq is not installed"
+    return
+  fi
+
+  if [[ ! -f "$settings" ]]; then
+    print -u2 "skip claude settings: no $settings"
+    return
+  fi
+
+  local notify="$HOME/.tmux/claude-usage/scripts/notify.sh"
+
+  local tmp
+  tmp="$(mktemp)"
+  if jq --arg cmd "$harvester" --arg state "$state" --arg notify "$notify" '
+    .statusLine = {type: "command", command: $cmd, padding: 0}
+    | .hooks = (.hooks // {}) + {
+        UserPromptSubmit: [{hooks: [{type: "command", command: ($state + " working")}]}],
+        Stop: [{hooks: [
+          {type: "command", command: ($state + " done")},
+          {type: "command", command: $notify}
+        ]}],
+        SessionStart: [{hooks: [{type: "command", command: ($state + " done")}]}],
+        SessionEnd: [{hooks: [{type: "command", command: ($state + " clear")}]}]
+      }' \
+    "$settings" >"$tmp"; then
+    mv "$tmp" "$settings"
+    print "claude settings -> claude-usage harvester + state hooks"
+  else
+    rm -f "$tmp"
+    print -u2 "skip claude settings: jq edit failed"
+  fi
+}
+
+# Give terminal-notifier the Claude icon so claude-usage notifications don't
+# show a generic terminal. macOS ignores -appIcon, so the bundle icon is
+# swapped and the app re-signed; re-run after a brew upgrade reverts it.
+configure_notifier_icon() {
+  local icns="$dotfiles_dir/tmux/claude-usage/assets/claude.icns"
+  local app app_icns
+
+  app="$(ls -d /opt/homebrew/Cellar/terminal-notifier/*/terminal-notifier.app 2>/dev/null | head -1)"
+  if [[ -z "$app" || ! -f "$icns" ]]; then
+    print -u2 "skip notifier icon: terminal-notifier or claude.icns missing"
+    return
+  fi
+
+  app_icns="$app/Contents/Resources/Terminal.icns"
+  if cmp -s "$icns" "$app_icns"; then
+    return
+  fi
+
+  cp "$icns" "$app_icns"
+  codesign --force -s - "$app" 2>/dev/null
+  touch "$app"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app"
+  killall NotificationCenter 2>/dev/null || true
+  print "notifier icon -> claude"
+}
+
 install_brew_packages() {
   if [[ "${SKIP_BREW:-0}" == "1" ]]; then
     print "skip brew bundle"
@@ -83,9 +151,11 @@ link "$dotfiles_dir/starship/.config/starship.toml" "$HOME/.config/starship.toml
 link "$dotfiles_dir/lazygit/.config/lazygit" "$HOME/.config/lazygit"
 link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
 link "$dotfiles_dir/vale/.config/vale/.vale.ini" "$HOME/.config/vale/.vale.ini"
-link "$dotfiles_dir/claude/.claude/statusline.sh" "$HOME/.claude/statusline.sh"
+link "$dotfiles_dir/tmux/claude-usage" "$HOME/.tmux/claude-usage"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
 
+configure_claude_settings
 install_brew_packages
+configure_notifier_icon
 install_tmux_plugins
