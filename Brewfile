@@ -14,6 +14,8 @@ brew "fzf-tab"
 brew "gh"
 brew "git-delta"
 brew "jq"
+# psql client for vim-dadbod; keg-only, so force-link to expose it on PATH
+brew "libpq", link: true
 brew "mise"
 brew "navi"
 brew "neovim"
