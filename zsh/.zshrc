@@ -179,6 +179,7 @@ alias cat='bat --paging=never'
 alias c='clear'
 
 alias lg='lazygit'
+alias ld='lazydocker'
 # --------------------------------
 # Git core
 # --------------------------------

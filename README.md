@@ -32,6 +32,8 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `z <dir>` | zoxide jump |
 | `ll` / `lt` | eza list / tree |
 | `lg` | lazygit |
+| `ld` | lazydocker |
+| `btop` | system resource monitor |
 | `v` | nvim |
 | `y` | yazi file manager |
 | `g`, `gst`, `gd`, `gpl`, `gpu`, … | git aliases (see `.zshrc`) |
@@ -107,6 +109,7 @@ Leader groups (which-key pops up after `Space`): `f` find · `g` git ·
 | `~/.config/mise/config.toml` | `mise/` |
 | `~/.config/starship.toml`, `~/.config/lazygit` | `starship/`, `lazygit/` |
 | `~/.config/atuin/config.toml` | `atuin/` |
+| `~/.config/btop/btop.conf` | `btop/` |
 | `~/.config/ghostty/*` | `ghostty/` |
 | `~/.config/vale/.vale.ini` | `vale/` |
 | `~/.config/commitlint/commitlint.config.mjs` | `commitlint/` |

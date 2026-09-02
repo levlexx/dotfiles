@@ -5,6 +5,7 @@ cask "gcloud-cli"
 
 brew "atuin"
 brew "bat"
+brew "btop"
 brew "direnv"
 brew "dive"
 brew "eza"
