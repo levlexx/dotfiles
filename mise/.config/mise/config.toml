@@ -29,6 +29,7 @@ go = "1.26.4"
 "npm:@commitlint/cli" = "21.2.0"
 "ubi:Automattic/harper" = { version = "2.6.0", exe = "harper-ls", matching = "harper-ls" }
 "ubi:errata-ai/vale-ls" = { version = "0.4.0", exe = "vale-ls" }
+uv = "latest"
 [env]
 GOBIN = "{{env.HOME}}/go/bin"
 JS_DEBUG_ADAPTER = "{{env.HOME}}/.local/share/vscode-js-debug/dist/src/dapDebugServer.js"
