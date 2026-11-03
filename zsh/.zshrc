@@ -173,8 +173,8 @@ export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-ran
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --icons=always --color=always {}'"
 
-if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.plugin.zsh" ]]; then
-  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.plugin.zsh"
+if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.zsh" ]]; then
+  source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.zsh"
   # fzf-tab draws its own menu; reuse the Tokyo Night FZF_DEFAULT_OPTS
   zstyle ':completion:*' menu no
   zstyle ':fzf-tab:*' use-fzf-default-opts yes
