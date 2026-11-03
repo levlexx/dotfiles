@@ -3,6 +3,8 @@ local palette = require("core.palette")
 local function set_highlights()
   local highlights = {
     Normal = { fg = palette.fg, bg = palette.bg },
+    -- inactive windows dim to the same #16161e as inactive tmux panes
+    NormalNC = { fg = palette.fg, bg = palette.bg_dark },
     NormalFloat = { fg = palette.fg, bg = palette.surface },
     FloatBorder = { fg = palette.border, bg = palette.surface },
     FloatTitle = { fg = palette.blue, bg = palette.surface, bold = true },
@@ -39,6 +41,7 @@ local ok, tokyonight = pcall(require, "tokyonight")
 if ok then
   tokyonight.setup({
     style = "night",
+    dim_inactive = true,
     styles = {
       sidebars = "dark",
       floats = "dark",
