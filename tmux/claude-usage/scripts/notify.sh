@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-# Claude Code Stop hook — posts a clickable macOS notification when a claude
-# session finishes while you're looking elsewhere. Clicking it jumps to the
+# Claude Code Stop / PermissionRequest hook — posts a clickable macOS
+# notification when a claude session finishes or needs you while you're
+# looking elsewhere. Clicking it jumps to the
 # exact tmux session + window (via scripts/focus-window.sh) and raises
 # Ghostty. Skipped when Ghostty is frontmost AND the pane's window is the one
 # currently on screen — you're already watching it.
@@ -9,6 +10,17 @@
 set -uo pipefail
 
 [ -n "${TMUX_PANE:-}" ] || exit 0
+
+# done (Stop hook) or waiting (permission prompt / question for you)
+kind="${1:-done}"
+
+# hook JSON on stdin: Stop has last_assistant_message, Notification a message
+input=""
+[ -t 0 ] || input="$(cat)"
+case "$kind" in
+waiting) title="✋ Claude needs you" sound="Glass" ;;
+*) title="✳ Claude done" sound="default" ;;
+esac
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GHOSTTY_ID="com.mitchellh.ghostty"
@@ -27,6 +39,7 @@ find_bin() {
 }
 
 TMUX_BIN="$(find_bin tmux)" || exit 0
+JQ="$(find_bin jq)" || JQ=""
 NOTIFIER="$(find_bin terminal-notifier)" || exit 0
 
 IFS=$'\t' read -r session win_id win_active attached win_name project <<EOF
@@ -47,12 +60,20 @@ if [[ "$front" == *"$GHOSTTY_ID"* ]] && [ "${win_active:-0}" = 1 ] && [ "${attac
 	exit 0
 fi
 
+# body: what Claude said (or is asking), one line; fall back to where it is
+body=""
+if [ -n "$input" ] && [ -n "$JQ" ]; then
+	body="$(printf '%s' "$input" | "$JQ" -r '.last_assistant_message // .message // empty' 2>/dev/null |
+		tr '\n\t' '  ' | sed -e 's/  */ /g' -e 's/^ //' | cut -c1-180)"
+fi
+[ -n "$body" ] || body="session $session · window $win_name"
+
 "$NOTIFIER" \
-	-title "✳ Claude done" \
-	-subtitle "$project" \
-	-message "session $session · window $win_name" \
+	-title "$title" \
+	-subtitle "$project · $win_name" \
+	-message "$body" \
 	-group "claude-$win_id" \
-	-sound default \
+	-sound "$sound" \
 	-appIcon "$DIR/../assets/claude.png" \
 	-execute "$DIR/focus-window.sh '$session' '$win_id'" \
 	>/dev/null 2>&1 || true

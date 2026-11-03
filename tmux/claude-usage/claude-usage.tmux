@@ -19,3 +19,6 @@ interpolate_option() {
 chmod +x "$CURRENT_DIR"/scripts/*.sh 2>/dev/null
 interpolate_option "status-right"
 interpolate_option "status-left"
+
+# spinner / blink frames and the agents summary (single instance per server)
+tmux run-shell -b "$CURRENT_DIR/scripts/animate.sh"

@@ -27,6 +27,9 @@ local function set_highlights()
     NvimSLWarn = { fg = palette.orange, bg = palette.surface_alt, bold = true },
     NvimSLError = { fg = palette.red, bg = palette.surface_alt, bold = true },
     NvimSLPurple = { fg = palette.purple, bg = palette.surface_alt, bold = true },
+    NvimSLClaude = { fg = palette.orange, bg = palette.surface_alt, bold = true },
+    NvimSLClaudeWait = { fg = palette.bg, bg = palette.red, bold = true },
+    NvimSLClaudeWaitCap = { fg = palette.red, bg = palette.bg },
     NvimSLFile = { fg = palette.fg, bg = palette.bg },
     NvimSLInactive = { fg = palette.dim, bg = palette.bg },
   }
@@ -177,6 +180,67 @@ local function location()
   return string.format("%d:%d %d%%%%", line, vim.fn.col("."), progress)
 end
 
+-- Claude capsule: claudecode.nvim connection plus this tmux window's agent
+-- state (@claude_state, stamped by the claude-usage hooks). The state is
+-- polled from tmux about once a second; the spinner only ticks while working.
+local glyph = vim.fn.nr2char
+local claude_icons = {
+  robot = glyph(0xF06A9),
+  waiting = glyph(0xF009E),
+  done = glyph(0xF012C),
+  error = glyph(0xF015A),
+}
+local spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+local claude = { state = "", frame = 1 }
+
+local function poll_claude_state()
+  local pane = vim.env.TMUX_PANE
+  if not pane then
+    return
+  end
+  vim.system({ "tmux", "display", "-p", "-t", pane, "#{@claude_state}" }, { text = true }, function(out)
+    local state = vim.trim(out.stdout or "")
+    if state ~= claude.state then
+      claude.state = state
+      vim.schedule(function()
+        vim.cmd.redrawtabline()
+      end)
+    end
+  end)
+end
+
+if vim.env.TMUX_PANE then
+  local ticks = 0
+  vim.uv.new_timer():start(
+    0,
+    150,
+    vim.schedule_wrap(function()
+      ticks = ticks + 1
+      if ticks % 7 == 1 then
+        poll_claude_state()
+      end
+      if claude.state == "working" then
+        claude.frame = claude.frame % #spinner + 1
+        vim.cmd.redrawtabline()
+      end
+    end)
+  )
+end
+
+local function claude_status()
+  local ok, cc = pcall(require, "claudecode")
+  local connected = ok and cc.is_claude_connected and cc.is_claude_connected()
+  local icon = claude.state == "working" and spinner[claude.frame] or claude_icons[claude.state]
+  if not connected and not icon then
+    return ""
+  end
+  local text = claude_icons.robot .. (connected and " ide" or "") .. (icon and (" " .. icon) or "")
+  if claude.state == "waiting" then
+    return capsule(text, "NvimSLClaudeWait", "NvimSLClaudeWaitCap")
+  end
+  return capsule(text, "NvimSLClaude", "NvimSLSurfaceCap")
+end
+
 -- Render the status panel at the TOP: the tabline slot is free (no tab pages
 -- used) and accepts the same %-syntax, so it just evaluates mini's content.
 -- The bottom statusline is hidden via laststatus=0 in core/options.lua.
@@ -205,6 +269,7 @@ statusline.setup({
         capsule(formatter_status(), "NvimSLWarn", "NvimSLSurfaceCap"),
       })
       local right = compact({
+        claude_status(),
         capsule(filetype(), "NvimSLSurface", "NvimSLSurfaceCap"),
         capsule(encoding(), "NvimSLSurface", "NvimSLSurfaceCap"),
         capsule(location(), mode_group, mode_cap),

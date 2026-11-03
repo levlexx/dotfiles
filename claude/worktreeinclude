@@ -1,0 +1,9 @@
+# Gitignored files Claude copies into each new worktree (claude -w / cw).
+# Only files that match here AND are gitignored are copied; tracked files never.
+# Install into a repo root with: wtinclude
+.env
+.env.*
+.envrc.local
+*.local.json
+*.local.yaml
+config/secrets.*

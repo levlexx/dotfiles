@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tmux display *)",
+      "Bash(tmux list-keys *)",
+      "Bash(npm view *)",
+      "Bash(tmux show *)",
+      "Bash(brew info *)",
+      "Bash(ghostty +validate-config *)",
+      "Bash(k9s info)"
+    ]
+  }
+}

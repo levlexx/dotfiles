@@ -46,3 +46,6 @@ mouse-hide-while-typing = true
 quick-terminal-position = top
 quick-terminal-animation-duration = 0.12
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
+
+# cursor trail (Neovide-like), Tokyo Night blue; see shaders/cursor_warp.glsl
+custom-shader = shaders/cursor_warp.glsl

@@ -201,6 +201,17 @@ alias lg='lazygit'
 alias ld='lazydocker'
 # claude in an isolated worktree: cw <name>, cw '#123' for a PR
 alias cw='claude --worktree'
+# drop the .worktreeinclude template into the current repo (copies .env etc.
+# into agent worktrees)
+wtinclude() {
+  local root
+  root="$(git rev-parse --show-toplevel 2>/dev/null)" || { print -u2 "not in a git repo"; return 1; }
+  if [[ -e "$root/.worktreeinclude" ]]; then
+    print -u2 "$root/.worktreeinclude already exists"
+    return 1
+  fi
+  cp ~/dotfiles/claude/worktreeinclude "$root/.worktreeinclude" && print "created $root/.worktreeinclude"
+}
 # --------------------------------
 # Git core
 # --------------------------------

@@ -26,13 +26,14 @@ link() {
   fi
 }
 
-# Wire Claude Code into the tmux claude-usage plugin: the statusLine slot
-# runs the silent harvester that feeds the usage capsule, and hooks stamp the
-# per-window work state (working/done ✳) shown in the window tabs.
+# Wire Claude Code into the tmux claude-usage plugin: the statusLine renders
+# the capsule row under the prompt (and feeds the usage harvester), and hooks
+# stamp the per-window agent state shown in the tmux tabs:
+#   working (spinner, +N subagents) · waiting (bell, red tab) · done · error ·
+#   idle; prefix N / prefix C jump to them
 configure_claude_settings() {
   local settings="$HOME/.claude/settings.json"
-  local harvester="$HOME/.tmux/claude-usage/scripts/harvester.sh"
-  local state="$HOME/.tmux/claude-usage/scripts/state.sh"
+  local scripts="$HOME/.tmux/claude-usage/scripts"
 
   if ! command -v jq >/dev/null 2>&1; then
     print -u2 "skip claude settings: jq is not installed"
@@ -44,28 +45,48 @@ configure_claude_settings() {
     return
   fi
 
-  local notify="$HOME/.tmux/claude-usage/scripts/notify.sh"
-
   local tmp
   tmp="$(mktemp)"
-  if jq --arg cmd "$harvester" --arg state "$state" --arg notify "$notify" '
-    .statusLine = {type: "command", command: $cmd, padding: 0}
+  if jq --arg s "$scripts" '
+    def cmd(c): {type: "command", command: ($s + "/" + c)};
+    .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
-        UserPromptSubmit: [{hooks: [{type: "command", command: ($state + " working")}]}],
-        Stop: [{hooks: [
-          {type: "command", command: ($state + " done")},
-          {type: "command", command: $notify}
-        ]}],
-        SessionStart: [{hooks: [{type: "command", command: ($state + " done")}]}],
-        SessionEnd: [{hooks: [{type: "command", command: ($state + " clear")}]}]
+        UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
+        PostToolUse: [{hooks: [cmd("state.sh working")]}],
+        Notification: [{
+          matcher: "permission_prompt|elicitation_dialog|agent_needs_input",
+          hooks: [cmd("state.sh waiting"), cmd("notify.sh waiting")]
+        }],
+        Stop: [{hooks: [cmd("state.sh done"), cmd("notify.sh done")]}],
+        StopFailure: [{hooks: [cmd("state.sh error")]}],
+        SubagentStart: [{hooks: [cmd("state.sh sub+")]}],
+        SubagentStop: [{hooks: [cmd("state.sh sub-")]}],
+        SessionStart: [{hooks: [cmd("state.sh idle")]}],
+        SessionEnd: [{hooks: [cmd("state.sh clear")]}]
       }' \
     "$settings" >"$tmp"; then
     mv "$tmp" "$settings"
-    print "claude settings -> claude-usage harvester + state hooks"
+    print "claude settings -> statusline + agent state hooks"
   else
     rm -f "$tmp"
     print -u2 "skip claude settings: jq edit failed"
   fi
+}
+
+# Code intelligence for Claude (go to definition / references via LSP).
+# Servers: gopls (mise run install-go-tools), typescript-language-server (mise).
+install_claude_plugins() {
+  if ! command -v claude >/dev/null 2>&1; then
+    print -u2 "skip claude plugins: claude is not installed"
+    return
+  fi
+
+  local plugin
+  for plugin in gopls-lsp typescript-lsp lua-lsp; do
+    claude plugin install "$plugin@claude-plugins-official" >/dev/null 2>&1 \
+      && print "claude plugin -> $plugin" \
+      || print -u2 "skip claude plugin $plugin: install failed"
+  done
 }
 
 # Give terminal-notifier the Claude icon so claude-usage notifications don't
@@ -170,19 +191,28 @@ link "$dotfiles_dir/nvim/.config/nvim" "$HOME/.config/nvim"
 link "$dotfiles_dir/starship/.config/starship.toml" "$HOME/.config/starship.toml"
 link "$dotfiles_dir/lazygit/.config/lazygit" "$HOME/.config/lazygit"
 link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
+link "$dotfiles_dir/atuin/.config/atuin/themes" "$HOME/.config/atuin/themes"
+link "$dotfiles_dir/yazi/.config/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
+link "$dotfiles_dir/k9s/.config/k9s/config.yaml" "$HOME/.config/k9s/config.yaml"
+link "$dotfiles_dir/k9s/.config/k9s/skins/tokyonight.yaml" "$HOME/.config/k9s/skins/tokyonight.yaml"
+link "$dotfiles_dir/lazydocker/.config/lazydocker/config.yml" "$HOME/.config/lazydocker/config.yml"
 link "$dotfiles_dir/btop/.config/btop/btop.conf" "$HOME/.config/btop/btop.conf"
 link "$dotfiles_dir/vale/.config/vale/.vale.ini" "$HOME/.config/vale/.vale.ini"
 link "$dotfiles_dir/bat/.config/bat" "$HOME/.config/bat"
 link "$dotfiles_dir/eza/.config/eza" "$HOME/.config/eza"
 link "$dotfiles_dir/tmux/claude-usage" "$HOME/.tmux/claude-usage"
 link "$dotfiles_dir/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+link "$dotfiles_dir/claude/commands" "$HOME/.claude/commands"
+link "$dotfiles_dir/claude/agents" "$HOME/.claude/agents"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
+link "$dotfiles_dir/ghostty/.config/ghostty/shaders" "$HOME/.config/ghostty/shaders"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
 
 configure_claude_settings
 install_brew_packages
+install_claude_plugins
 build_bat_cache
 install_gh_extensions
 configure_notifier_icon
