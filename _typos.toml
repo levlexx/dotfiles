@@ -1,3 +1,8 @@
 [files]
 # binary icons trip the spell-checker
 extend-exclude = ["tmux/claude-usage/assets/"]
+
+[default.extend-words]
+# vim vocabulary: <leader>ba (alternate buffer), :enew
+ba = "ba"
+enew = "enew"

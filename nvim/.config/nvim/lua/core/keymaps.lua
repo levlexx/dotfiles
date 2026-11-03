@@ -252,7 +252,6 @@ end, { desc = "Toggle wrap" })
 
 -- AI / agents ----------------------------------------------------------------
 map("n", "<leader>ac", agent("claude"), { desc = "Claude Code" })
-map("n", "<leader>ag", agent("gemini"), { desc = "Gemini CLI" })
 map("n", "<leader>ao", agent("opencode"), { desc = "OpenCode" })
 
 -- Discoverability ------------------------------------------------------------

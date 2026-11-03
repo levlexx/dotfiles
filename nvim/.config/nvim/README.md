@@ -194,7 +194,6 @@ also get vale style linting via `vale-ls`.
 | `<leader>uL` | Toggle relative numbers |
 | `<leader>ao` | OpenCode |
 | `<leader>ac` | Claude Code |
-| `<leader>ag` | Gemini CLI |
 
 Use `<leader>?` to show buffer-local keymaps and `<C-w><space>` for window key discovery.
 

@@ -24,19 +24,6 @@ local function set_highlights()
     FzfLuaPreviewNormal = { fg = palette.fg, bg = palette.surface },
     FzfLuaPreviewBorder = { fg = palette.border, bg = palette.surface },
 
-    NeoTreeNormal = { fg = palette.fg, bg = palette.bg },
-    NeoTreeNormalNC = { fg = palette.muted, bg = palette.bg },
-    NeoTreeWinSeparator = { fg = palette.border, bg = palette.bg },
-    NeoTreeDirectoryName = { fg = palette.blue, bold = true },
-    NeoTreeDirectoryIcon = { fg = palette.blue },
-    NeoTreeFileName = { fg = palette.fg },
-    NeoTreeFileNameOpened = { fg = palette.green, bold = true },
-    NeoTreeGitAdded = { fg = palette.green },
-    NeoTreeGitDeleted = { fg = palette.red },
-    NeoTreeGitModified = { fg = palette.orange },
-    NeoTreeGitUntracked = { fg = palette.purple },
-    NeoTreeIndentMarker = { fg = palette.border },
-
     NvimDashboardHeader = { fg = palette.blue, bold = true },
     NvimDashboardButton = { fg = palette.fg },
     NvimDashboardShortcut = { fg = palette.green, bold = true },
@@ -51,7 +38,7 @@ end
 local ok, tokyonight = pcall(require, "tokyonight")
 if ok then
   tokyonight.setup({
-    style = "moon",
+    style = "night",
     styles = {
       sidebars = "dark",
       floats = "dark",
