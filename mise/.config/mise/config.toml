@@ -4,6 +4,10 @@ go = "1.26.4"
 "npm:@biomejs/biome" = "2.5.0"
 "npm:prettier" = "3.8.4"
 "npm:@vtsls/language-server" = "0.3.0"
+# typescript-language-server backs Claude Code's typescript-lsp plugin (nvim
+# uses vtsls); global typescript is only the fallback, projects use their own
+"npm:typescript-language-server" = "6.0.3"
+"npm:typescript" = "6.0.3"
 "npm:@angular/language-server" = "22.0.4"
 "npm:@typespec/compiler" = "1.13.0"
 # GitHub release binary via ubi (handles the .gz single-binary asset and the

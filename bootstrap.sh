@@ -70,6 +70,22 @@ configure_claude_settings() {
   fi
 }
 
+# Code intelligence for Claude (go to definition / references via LSP).
+# Servers: gopls (mise run install-go-tools), typescript-language-server (mise).
+install_claude_plugins() {
+  if ! command -v claude >/dev/null 2>&1; then
+    print -u2 "skip claude plugins: claude is not installed"
+    return
+  fi
+
+  local plugin
+  for plugin in gopls-lsp typescript-lsp lua-lsp; do
+    claude plugin install "$plugin@claude-plugins-official" >/dev/null 2>&1 \
+      && print "claude plugin -> $plugin" \
+      || print -u2 "skip claude plugin $plugin: install failed"
+  done
+}
+
 # Give terminal-notifier the Claude icon so claude-usage notifications don't
 # show a generic terminal. macOS ignores -appIcon, so the bundle icon is
 # swapped and the app re-signed; re-run after a brew upgrade reverts it.
@@ -185,6 +201,7 @@ link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/g
 
 configure_claude_settings
 install_brew_packages
+install_claude_plugins
 build_bat_cache
 install_gh_extensions
 configure_notifier_icon
