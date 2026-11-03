@@ -10,6 +10,7 @@ pick="$(
 		--border=rounded --border-label ' sesh ' --prompt 'all › ' \
 		--header '^a all  ^t tmux  ^x zoxide  ^d kill' \
 		--bind 'tab:down,btab:up' \
+		--preview 'sesh preview {}' --preview-window 'right,55%,border-left' \
 		--bind 'ctrl-a:change-prompt(all › )+reload(sesh list --icons)' \
 		--bind 'ctrl-t:change-prompt(tmux › )+reload(sesh list -t --icons)' \
 		--bind 'ctrl-x:change-prompt(zoxide › )+reload(sesh list -z --icons)' \

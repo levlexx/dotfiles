@@ -1,6 +1,25 @@
-# Pinned sessions for the tmux picker (prefix o); zoxide dirs show up too.
+# Sessions for the tmux picker (prefix o); zoxide dirs show up too.
+# A project session opens as: 1 nvim · 2 claude · 3 shell (git status).
+
+[default_session]
+preview_command = "eza --all --git --icons=always --color=always {}"
 
 [[session]]
 name = "dotfiles"
 path = "~/dotfiles"
 startup_command = "nvim"
+windows = ["claude", "shell"]
+
+# every project under ~/Projects gets the same layout
+[[wildcard]]
+pattern = "~/Projects/*"
+startup_command = "nvim"
+windows = ["claude", "shell"]
+
+[[window]]
+name = "claude"
+startup_script = "claude"
+
+[[window]]
+name = "shell"
+startup_script = "git status -sb"
