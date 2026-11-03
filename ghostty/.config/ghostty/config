@@ -33,3 +33,16 @@ shell-integration = zsh
 confirm-close-surface = false
 
 quit-after-last-window-closed = true
+
+# readability
+adjust-cell-height = 8%
+font-thicken = true
+window-padding-balance = true
+window-padding-color = extend
+mouse-hide-while-typing = true
+
+# drop-down terminal from anywhere (needs Accessibility permission); it runs
+# zsh, so it attaches to the same tmux "main" session
+quick-terminal-position = top
+quick-terminal-animation-duration = 0.12
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
