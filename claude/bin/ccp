@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+#
+# ccp — Claude Code per-project extras. Plugins and MCP servers are off by
+# default (every enabled one costs context in every session); turn on what a
+# project needs, from the project's root:
+#
+#   ccp                      what is on here + what is available
+#   ccp plugin <name> [off]  enable/disable a plugin for this project only
+#                            (.claude/settings.local.json, never committed)
+#   ccp mcp <name> [off]     add/remove an MCP server from ~/dotfiles/claude/mcp
+#                            in local scope (this project, this machine)
+#
+# Plugins come from claude-plugins-official unless <name> has an @marketplace.
+
+set -euo pipefail
+
+CATALOG="${DOTFILES_DIR:-$HOME/dotfiles}/claude/mcp"
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+local_settings="$root/.claude/settings.local.json"
+
+die() { printf 'ccp: %s\n' "$*" >&2; exit 1; }
+
+plugin_id() {
+	case "$1" in
+	*@*) printf '%s' "$1" ;;
+	*) printf '%s@claude-plugins-official' "$1" ;;
+	esac
+}
+
+set_plugin() {
+	local id value tmp
+	id="$(plugin_id "$1")" value="$2"
+	mkdir -p "$root/.claude"
+	[ -s "$local_settings" ] || printf '{}\n' >"$local_settings"
+	tmp="$(mktemp)"
+	jq --arg id "$id" --argjson v "$value" '.enabledPlugins[$id] = $v' "$local_settings" >"$tmp" && mv "$tmp" "$local_settings"
+	printf 'plugin %s -> %s in %s\n' "$id" "$value" "${local_settings/#$HOME/\~}"
+}
+
+set_mcp() {
+	local name="$1" on="$2" file json
+	if [ "$on" = false ]; then
+		(cd "$root" && claude mcp remove -s local "$name")
+		return
+	fi
+	file="$CATALOG/$name.json"
+	[ -f "$file" ] || die "no MCP '$name' in ${CATALOG/#$HOME/\~} (have: $(ls "$CATALOG" | sed 's/\.json$//' | tr '\n' ' '))"
+	# catalog paths start with ~/ so they work on both Macs
+	json="$(jq -c --arg home "$HOME" '.command |= sub("^~/"; $home + "/")' "$file")"
+	(cd "$root" && claude mcp add-json -s local "$name" "$json")
+}
+
+status() {
+	printf 'project: %s\n\n' "${root/#$HOME/\~}"
+	printf 'plugins on here (local overrides):\n'
+	if [ -s "$local_settings" ]; then
+		jq -r '.enabledPlugins // {} | to_entries[] | "  \(if .value then "on " else "off" end)  \(.key)"' "$local_settings"
+	fi
+	printf '\nplugins on everywhere (user):\n'
+	jq -r '.enabledPlugins // {} | to_entries[] | select(.value) | "  on   \(.key)"' "$HOME/.claude/settings.json"
+	printf '\nMCP servers here:\n'
+	(cd "$root" && claude mcp list 2>/dev/null | grep -v '^Checking' | sed '/^$/d; s/^/  /')
+	printf '\navailable MCP (ccp mcp <name>): %s\n' "$(ls "$CATALOG" | sed 's/\.json$//' | tr '\n' ' ')"
+	printf 'installed plugins (ccp plugin <name>): %s\n' \
+		"$(jq -r '.plugins // {} | keys[] | sub("@.*"; "")' "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null | tr '\n' ' ')"
+}
+
+case "${1:-}" in
+"") status ;;
+plugin)
+	[ -n "${2:-}" ] || die "usage: ccp plugin <name> [off]"
+	if [ "${3:-}" = off ]; then set_plugin "$2" false; else set_plugin "$2" true; fi
+	;;
+mcp)
+	[ -n "${2:-}" ] || die "usage: ccp mcp <name> [off]"
+	if [ "${3:-}" = off ]; then set_mcp "$2" false; else set_mcp "$2" true; fi
+	;;
+-h | --help | help) sed -n '3,13p' "$0" | sed 's/^# \{0,1\}//' ;;
+*) die "unknown command '$1' (try: ccp help)" ;;
+esac

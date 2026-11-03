@@ -36,6 +36,7 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `cw <name>` | Claude in an isolated git worktree |
 | `wtinclude` | add `.worktreeinclude` (copy `.env` etc. into agent worktrees) |
 | `/commit`, `/pr` | Claude commands: conventional commits, PR with description |
+| `ccp` | Claude per-project extras: `ccp plugin superpowers`, `ccp mcp blender` (off by default) |
 | `btop` | system resource monitor |
 | `gh dash` | PR / issue dashboard |
 | `git dft` / `git dlog` | syntax-aware diff / log (difftastic) |

@@ -49,6 +49,9 @@ configure_claude_settings() {
   tmp="$(mktemp)"
   if jq --arg s "$scripts" '
     def cmd(c): {type: "command", command: ($s + "/" + c)};
+    # compact long sessions at 400K instead of ~967K on 1M-context models:
+    # every turn resends the whole context; keep a value set by hand
+    .autoCompactWindow //= 400000 |
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
         UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
@@ -73,7 +76,9 @@ configure_claude_settings() {
   fi
 }
 
-# Code intelligence for Claude (go to definition / references via LSP).
+# Claude Code plugins: LSPs stay on everywhere (~0 tokens, start only on
+# matching files); the rest are installed but OFF by default, since each one
+# costs context in every session. Turn them on per project with `ccp plugin`.
 # Servers: gopls (mise run install-go-tools), typescript-language-server (mise).
 install_claude_plugins() {
   if ! command -v claude >/dev/null 2>&1; then
@@ -82,11 +87,26 @@ install_claude_plugins() {
   fi
 
   local plugin
-  for plugin in gopls-lsp typescript-lsp lua-lsp; do
+  local -a always=(gopls-lsp typescript-lsp lua-lsp)
+  local -a opt_in=(superpowers figma frontend-design context7)
+  for plugin in $always $opt_in; do
     claude plugin install "$plugin@claude-plugins-official" >/dev/null 2>&1 \
       && print "claude plugin -> $plugin" \
       || print -u2 "skip claude plugin $plugin: install failed"
   done
+
+  # install enables; switch the opt-in ones back off at user level
+  local settings="$HOME/.claude/settings.json" tmp
+  [[ -f "$settings" ]] && command -v jq >/dev/null 2>&1 || return
+  tmp="$(mktemp)"
+  # --args turns every later word into $ARGS, so the file goes in on stdin
+  if jq --args '.enabledPlugins |= reduce $ARGS.positional[] as $p (. // {}; .[$p + "@claude-plugins-official"] = false)' \
+    $opt_in <"$settings" >"$tmp"; then
+    mv "$tmp" "$settings"
+    print "claude plugins off by default: ${(j:, :)opt_in}"
+  else
+    rm -f "$tmp"
+  fi
 }
 
 # Give terminal-notifier the Claude icon so claude-usage notifications don't
@@ -204,6 +224,7 @@ link "$dotfiles_dir/tmux/claude-usage" "$HOME/.tmux/claude-usage"
 link "$dotfiles_dir/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 link "$dotfiles_dir/claude/commands" "$HOME/.claude/commands"
 link "$dotfiles_dir/claude/agents" "$HOME/.claude/agents"
+link "$dotfiles_dir/claude/bin/ccp" "$HOME/.local/bin/ccp"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"

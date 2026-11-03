@@ -27,7 +27,7 @@ JQ="$(find_bin jq)" || exit 0
 printf '%s' "$input" | "$DIR/harvester.sh"
 
 # \x1f, not tab: bash collapses runs of tab IFS, dropping empty fields
-IFS=$'\x1f' read -r model version effort fast ctx cwd worktree pr_num pr_state added removed dur_ms <<EOF
+IFS=$'\x1f' read -r model version effort fast ctx cwd worktree pr_num pr_state added removed dur_ms window cache_warm cache_hit <<EOF
 $(printf '%s' "$input" | "$JQ" -r '[
 	(.model.display_name // "Claude"),
 	(.version // ""),
@@ -40,7 +40,10 @@ $(printf '%s' "$input" | "$JQ" -r '[
 	(.pr.review_state // ""),
 	(.cost.total_lines_added // 0),
 	(.cost.total_lines_removed // 0),
-	(.cost.total_duration_ms // 0)
+	(.cost.total_duration_ms // 0),
+	(.context_window.context_window_size // 0),
+	(if .prompt_cache.warm == null then "" else .prompt_cache.warm end), # `//` would eat false
+	(if .prompt_cache.hit_ratio == null then "" else (.prompt_cache.hit_ratio * 100 | floor) end)
 ] | map(tostring) | join("\u001f")' 2>/dev/null)
 EOF
 
@@ -87,7 +90,17 @@ head="$(fg "$BG")"$'\033[1m'"󰚩 $model"$'\033[22m'
 [ "$fast" = true ] && head+=" 󱐋"
 out+="$(capsule "$BLUE" "$head")"
 
-# context window: 8-cell bar
+# context window: 8-cell bar towards the auto-compact point, not the full
+# window (1M-context models only compact at autoCompactWindow, see bootstrap)
+compact_at="${CLAUDE_CODE_AUTO_COMPACT_WINDOW:-}"
+if [ -z "$compact_at" ] && [ -f "$HOME/.claude/settings.json" ]; then
+	compact_at="$("$JQ" -r '.autoCompactWindow // empty' "$HOME/.claude/settings.json" 2>/dev/null)"
+fi
+compact_at="${compact_at//[!0-9]/}"
+if [ -n "$compact_at" ] && [ "${window:-0}" -gt "$compact_at" ] 2>/dev/null; then
+	ctx=$((ctx * window / compact_at))
+	[ "$ctx" -gt 100 ] && ctx=100
+fi
 filled=$(((ctx * 8 + 50) / 100))
 [ "$filled" -gt 8 ] && filled=8
 bar=""
@@ -96,6 +109,14 @@ for ((i = 0; i < 8; i++)); do
 done
 c="$(pct_color "$ctx")"
 out+="$(capsule "$SURFACE" "$(fg "$c")$bar $(fg "$FG")${ctx}%")"
+
+# prompt cache: hit ratio while warm, snowflake once the TTL lapsed (the next
+# turn re-sends the whole context uncached)
+if [ "$cache_warm" = false ]; then
+	out+="$(capsule "$SURFACE" "$(fg "$CYAN")󰜗 $(fg "$DIM")cold")"
+elif [ -n "$cache_hit" ]; then
+	out+="$(capsule "$SURFACE" "$(fg "$(pct_color $((100 - cache_hit)))")󰆼 $(fg "$FG")${cache_hit}%")"
+fi
 
 # git: branch, worktree, PR
 if [ -n "$cwd" ] && branch="$(git -C "$cwd" symbolic-ref --short -q HEAD 2>/dev/null)"; then
