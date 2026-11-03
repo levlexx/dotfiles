@@ -65,7 +65,11 @@ configure_claude_settings() {
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
         UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
-        PostToolUse: [{hooks: [cmd("state.sh working")]}],
+        PostToolUse: [
+          {hooks: [cmd("state.sh working")]},
+          # format what Claude edited with the project formatter
+          {matcher: "Edit|Write|MultiEdit", hooks: [{type: "command", command: ($ENV.HOME + "/.claude/hooks/format.sh"), timeout: 30}]}
+        ],
         Notification: [{
           matcher: "permission_prompt|elicitation_dialog|agent_needs_input",
           hooks: [cmd("state.sh waiting"), cmd("notify.sh waiting")]
@@ -234,6 +238,7 @@ link "$dotfiles_dir/tmux/claude-usage" "$HOME/.tmux/claude-usage"
 link "$dotfiles_dir/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 link "$dotfiles_dir/claude/commands" "$HOME/.claude/commands"
 link "$dotfiles_dir/claude/agents" "$HOME/.claude/agents"
+link "$dotfiles_dir/claude/hooks" "$HOME/.claude/hooks"
 link "$dotfiles_dir/claude/bin/ccp" "$HOME/.local/bin/ccp"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
