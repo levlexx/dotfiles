@@ -54,8 +54,9 @@ if ok then
   })
 end
 
--- follow macOS light/dark like Ghostty and tmux: at startup, on focus and
--- every 5s (AppleInterfaceStyle is only set in dark mode)
+-- dark by default; with vim.g.follow_macos = true follow macOS light/dark
+-- like Ghostty and tmux: at startup, on focus and every 5s
+-- (AppleInterfaceStyle is only set in dark mode)
 local function macos_background()
   local ok, out = pcall(function()
     return vim.system({ "defaults", "read", "-g", "AppleInterfaceStyle" }, { text = true }):wait(500)
@@ -71,10 +72,14 @@ local function sync_background()
   end
 end
 
-if vim.fn.has("mac") == 1 then
+if vim.g.follow_macos and vim.fn.has("mac") == 1 then
   vim.o.background = macos_background()
   vim.api.nvim_create_autocmd("FocusGained", { callback = sync_background })
   vim.uv.new_timer():start(5000, 5000, vim.schedule_wrap(sync_background))
+end
+
+if not vim.g.follow_macos then
+  vim.o.background = "dark"
 end
 
 if not pcall(vim.cmd.colorscheme, "tokyonight") then

@@ -23,13 +23,18 @@ i=0
 last=""
 busy_last=0
 
-# macOS light/dark: repaint the pane backgrounds and borders to match
-# Ghostty's light:/dark: theme (Tokyo Night day / night). Checked ~every 5s.
+# Tokyo Night is dark by default. With `set -g @follow_macos on` the pane
+# backgrounds and borders follow macOS light/dark (Tokyo Night day / night),
+# checked ~every 5s; pair it with Ghostty's `theme = light:...,dark:...`.
 appearance=""
 ticks=0
 apply_appearance() {
 	local mode
-	if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then mode=dark; else mode=light; fi
+	mode=dark
+	if [ "$(t show -gqv @follow_macos 2>/dev/null)" = on ] &&
+		! defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
+		mode=light
+	fi
 	# compare with tmux, not a local copy: a config reload resets @appearance
 	# (and the styles) so the next check repaints
 	appearance="$mode"

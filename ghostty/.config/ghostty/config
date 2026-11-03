@@ -1,7 +1,8 @@
 
-# follows macOS appearance; tmux (claude-usage/scripts/animate.sh) and nvim
-# (plugins/theme.lua) switch with it
-theme = light:TokyoNight Day,dark:Tokyo Night
+# always dark. To follow macOS light/dark instead, use
+#   theme = light:TokyoNight Day,dark:Tokyo Night
+# plus `set -g @follow_macos on` (tmux) and vim.g.follow_macos = true (nvim)
+theme = Tokyo Night
 font-family = JetBrainsMono Nerd Font
 font-feature = -calt
 font-feature = -liga
