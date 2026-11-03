@@ -1,0 +1,5 @@
+{
+  "type": "stdio",
+  "command": "~/.local/share/mise/shims/uvx",
+  "args": ["freecad-mcp"]
+}
