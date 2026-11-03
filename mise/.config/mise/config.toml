@@ -88,6 +88,10 @@ printf 'JS debug adapter: %s\n' "$target/dist/src/dapDebugServer.js"
 '''
 
 [tasks.doctor]
+description = "Check this machine against the dotfiles repo (links, packages, Claude, tmux, fonts)"
+run = "~/dotfiles/scripts/doctor.sh"
+
+[tasks.versions]
 description = "Print runtime, Go tool, and editor tool versions"
 run = '''
 set -u

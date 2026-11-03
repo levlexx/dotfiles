@@ -27,6 +27,7 @@ jobs:
             tmux/scripts/*.sh \
             claude/bin/ccp \
             claude/hooks/format.sh \
+            scripts/doctor.sh \
             git/.config/git/hooks/*
 
       - name: zsh syntax
