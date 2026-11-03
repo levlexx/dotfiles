@@ -7,6 +7,15 @@ export VISUAL="nvim"
 export PAGER="less -R"
 export LESS="-FRX"
 export CLICOLOR=1
+# eza looks in ~/Library/Application Support on macOS otherwise
+export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
+
+# Tokyo Night (tokyonight.nvim extras/fzf/tokyonight_night.sh)
+export FZF_DEFAULT_OPTS="--highlight-line --info=inline-right --ansi --layout=reverse --border=none \
+  --color=bg+:#283457,bg:#16161e,border:#27a1b9,fg:#c0caf5,gutter:#16161e \
+  --color=header:#ff9e64,hl+:#2ac3de,hl:#2ac3de,info:#545c7e,marker:#ff007c \
+  --color=pointer:#ff007c,prompt:#2ac3de,query:#c0caf5:regular,scrollbar:#27a1b9 \
+  --color=separator:#ff9e64,spinner:#ff007c"
 
 # --------------------------------
 # Homebrew / PATH

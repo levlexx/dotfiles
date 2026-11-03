@@ -108,6 +108,16 @@ install_brew_packages() {
   brew bundle --file="$dotfiles_dir/Brewfile"
 }
 
+# bat (and delta's syntax-theme) only see custom themes after a cache build
+build_bat_cache() {
+  if ! command -v bat >/dev/null 2>&1; then
+    print -u2 "skip bat cache: bat is not installed"
+    return
+  fi
+
+  bat cache --build >/dev/null && print "bat cache -> tokyonight_night"
+}
+
 install_tmux_plugins() {
   if [[ "${SKIP_TMUX_PLUGINS:-0}" == "1" ]]; then
     print "skip tmux plugins"
@@ -152,11 +162,14 @@ link "$dotfiles_dir/lazygit/.config/lazygit" "$HOME/.config/lazygit"
 link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
 link "$dotfiles_dir/btop/.config/btop/btop.conf" "$HOME/.config/btop/btop.conf"
 link "$dotfiles_dir/vale/.config/vale/.vale.ini" "$HOME/.config/vale/.vale.ini"
+link "$dotfiles_dir/bat/.config/bat" "$HOME/.config/bat"
+link "$dotfiles_dir/eza/.config/eza" "$HOME/.config/eza"
 link "$dotfiles_dir/tmux/claude-usage" "$HOME/.tmux/claude-usage"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
 
 configure_claude_settings
 install_brew_packages
+build_bat_cache
 configure_notifier_icon
 install_tmux_plugins
