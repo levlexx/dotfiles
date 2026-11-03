@@ -193,7 +193,12 @@ also get vale style linting via `vale-ls`.
 | `<leader>ul` | Toggle line numbers |
 | `<leader>uL` | Toggle relative numbers |
 | `<leader>ao` | OpenCode |
-| `<leader>ac` | Claude Code |
+| `<leader>ac` / `af` | Claude Code (claudecode.nvim): toggle / focus |
+| `<leader>ar` / `aC` | Claude: resume / continue |
+| `<leader>ab` | Claude: add current buffer to context |
+| `<leader>as` | Claude: send selection (visual) / add file (oil) |
+| `<leader>aa` / `ad` | Claude: accept / deny proposed diff |
+| `<leader>am` | Claude: select model |
 
 Use `<leader>?` to show buffer-local keymaps and `<C-w><space>` for window key discovery.
 

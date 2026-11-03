@@ -251,7 +251,6 @@ map("n", "<leader>uw", function()
 end, { desc = "Toggle wrap" })
 
 -- AI / agents ----------------------------------------------------------------
-map("n", "<leader>ac", agent("claude"), { desc = "Claude Code" })
 map("n", "<leader>ao", agent("opencode"), { desc = "OpenCode" })
 
 -- Discoverability ------------------------------------------------------------
