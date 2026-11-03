@@ -11,12 +11,37 @@ vim.pack.add({
   -- Exact tag: the v2 tags are not reachable from the repo's stale default
   -- branch, so vim.version.range("2") resolves to v1.15.1.
   { src = gh("fredrikaverpil/neotest-golang"), version = "v2.9.0" },
+  -- TypeScript: vitest (alltrack) and jest (Nx workspaces such as octopus);
+  -- karma projects have no maintained adapter
+  { src = gh("marilari88/neotest-vitest") },
+  { src = gh("nvim-neotest/neotest-jest") },
 }, {
   confirm = false,
   load = true,
 })
 
 local configured = false
+
+-- Nx: run jest from the workspace root (nx.json) with the nearest project
+-- jest.config, so `jest --config apps/x/jest.config.ts` resolves presets
+local jest_configs = { "jest.config.ts", "jest.config.js", "jest.config.cjs", "jest.config.mjs" }
+
+local function nearest(names, path)
+  return vim.fs.find(names, { upward = true, path = vim.fs.dirname(path) })[1]
+end
+
+local function jest_config(path)
+  return nearest(jest_configs, path)
+end
+
+local function jest_cwd(path)
+  local nx = nearest({ "nx.json" }, path)
+  if nx then
+    return vim.fs.dirname(nx)
+  end
+  local config = jest_config(path)
+  return config and vim.fs.dirname(config) or vim.fn.getcwd()
+end
 
 local function neotest()
   local t = require("neotest")
@@ -26,6 +51,13 @@ local function neotest()
       adapters = {
         require("neotest-golang")({
           go_test_args = { "-count=1" },
+        }),
+        require("neotest-vitest"),
+        require("neotest-jest")({
+          jestCommand = "npx jest",
+          jestConfigFile = jest_config,
+          cwd = jest_cwd,
+          env = { CI = "true" },
         }),
       },
     })
