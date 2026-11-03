@@ -29,7 +29,8 @@ link() {
 # Wire Claude Code into the tmux claude-usage plugin: the statusLine renders
 # the capsule row under the prompt (and feeds the usage harvester), and hooks
 # stamp the per-window agent state shown in the tmux tabs:
-#   working (spinner) · waiting (bell: permission/question) · done · error · idle
+#   working (spinner, +N subagents) · waiting (bell, red tab) · done · error ·
+#   idle; prefix N / prefix C jump to them
 configure_claude_settings() {
   local settings="$HOME/.claude/settings.json"
   local scripts="$HOME/.tmux/claude-usage/scripts"
@@ -58,6 +59,8 @@ configure_claude_settings() {
         }],
         Stop: [{hooks: [cmd("state.sh done"), cmd("notify.sh done")]}],
         StopFailure: [{hooks: [cmd("state.sh error")]}],
+        SubagentStart: [{hooks: [cmd("state.sh sub+")]}],
+        SubagentStop: [{hooks: [cmd("state.sh sub-")]}],
         SessionStart: [{hooks: [cmd("state.sh idle")]}],
         SessionEnd: [{hooks: [cmd("state.sh clear")]}]
       }' \

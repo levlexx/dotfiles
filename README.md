@@ -67,14 +67,17 @@ New terminals attach to the `main` tmux session automatically.
 | `prefix t` | scratch shell popup (same key hides it) |
 | `prefix A` | Claude in a split on the right |
 | `prefix W` | Claude in a new git worktree, own window |
+| `prefix N` | jump to the next agent that wants you (waiting › error › done) |
+| `prefix C` | agent picker: all Claude windows, last reply, live preview |
 | `prefix F` | fingers: copy hashes / paths / URLs by hint |
 | `prefix a` / `S` | last window / last session |
 
 Sessions persist and auto-restore (resurrect + continuum).
 
 Claude windows are named after the session's task title, and their tab shows
-the agent state: spinner = working, pulsing bell = waiting for you (also a
-macOS notification), check = finished and not seen yet, ✗ = API error,
+the agent state: spinner = working (+N = subagents), pulsing bell on a red
+tab = waiting for you (also a macOS notification with Claude's question or
+last reply), check = finished and not seen yet, ✗ = API error,
 robot = idle. Next to the session name, a capsule counts states across all
 sessions. Inside Claude, a capsule row under the prompt shows model · effort,
 context bar, branch / worktree / PR, lines changed, and session time.

@@ -13,6 +13,10 @@ set -uo pipefail
 
 # done (Stop hook) or waiting (permission prompt / question for you)
 kind="${1:-done}"
+
+# hook JSON on stdin: Stop has last_assistant_message, Notification a message
+input=""
+[ -t 0 ] || input="$(cat)"
 case "$kind" in
 waiting) title="✋ Claude needs you" sound="Glass" ;;
 *) title="✳ Claude done" sound="default" ;;
@@ -35,6 +39,7 @@ find_bin() {
 }
 
 TMUX_BIN="$(find_bin tmux)" || exit 0
+JQ="$(find_bin jq)" || JQ=""
 NOTIFIER="$(find_bin terminal-notifier)" || exit 0
 
 IFS=$'\t' read -r session win_id win_active attached win_name project <<EOF
@@ -55,10 +60,18 @@ if [[ "$front" == *"$GHOSTTY_ID"* ]] && [ "${win_active:-0}" = 1 ] && [ "${attac
 	exit 0
 fi
 
+# body: what Claude said (or is asking), one line; fall back to where it is
+body=""
+if [ -n "$input" ] && [ -n "$JQ" ]; then
+	body="$(printf '%s' "$input" | "$JQ" -r '.last_assistant_message // .message // empty' 2>/dev/null |
+		tr '\n\t' '  ' | sed -e 's/  */ /g' -e 's/^ //' | cut -c1-180)"
+fi
+[ -n "$body" ] || body="session $session · window $win_name"
+
 "$NOTIFIER" \
 	-title "$title" \
-	-subtitle "$project" \
-	-message "session $session · window $win_name" \
+	-subtitle "$project · $win_name" \
+	-message "$body" \
 	-group "claude-$win_id" \
 	-sound "$sound" \
 	-appIcon "$DIR/../assets/claude.png" \
