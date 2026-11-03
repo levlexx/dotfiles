@@ -26,13 +26,13 @@ link() {
   fi
 }
 
-# Wire Claude Code into the tmux claude-usage plugin: the statusLine slot
-# runs the silent harvester that feeds the usage capsule, and hooks stamp the
-# per-window work state (working/done ✳) shown in the window tabs.
+# Wire Claude Code into the tmux claude-usage plugin: the statusLine renders
+# the capsule row under the prompt (and feeds the usage harvester), and hooks
+# stamp the per-window agent state shown in the tmux tabs:
+#   working (spinner) · waiting (bell: permission/question) · done · error · idle
 configure_claude_settings() {
   local settings="$HOME/.claude/settings.json"
-  local harvester="$HOME/.tmux/claude-usage/scripts/harvester.sh"
-  local state="$HOME/.tmux/claude-usage/scripts/state.sh"
+  local scripts="$HOME/.tmux/claude-usage/scripts"
 
   if ! command -v jq >/dev/null 2>&1; then
     print -u2 "skip claude settings: jq is not installed"
@@ -44,24 +44,26 @@ configure_claude_settings() {
     return
   fi
 
-  local notify="$HOME/.tmux/claude-usage/scripts/notify.sh"
-
   local tmp
   tmp="$(mktemp)"
-  if jq --arg cmd "$harvester" --arg state "$state" --arg notify "$notify" '
-    .statusLine = {type: "command", command: $cmd, padding: 0}
+  if jq --arg s "$scripts" '
+    def cmd(c): {type: "command", command: ($s + "/" + c)};
+    .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
-        UserPromptSubmit: [{hooks: [{type: "command", command: ($state + " working")}]}],
-        Stop: [{hooks: [
-          {type: "command", command: ($state + " done")},
-          {type: "command", command: $notify}
-        ]}],
-        SessionStart: [{hooks: [{type: "command", command: ($state + " done")}]}],
-        SessionEnd: [{hooks: [{type: "command", command: ($state + " clear")}]}]
+        UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
+        PostToolUse: [{hooks: [cmd("state.sh working")]}],
+        Notification: [{
+          matcher: "permission_prompt|elicitation_dialog|agent_needs_input",
+          hooks: [cmd("state.sh waiting"), cmd("notify.sh waiting")]
+        }],
+        Stop: [{hooks: [cmd("state.sh done"), cmd("notify.sh done")]}],
+        StopFailure: [{hooks: [cmd("state.sh error")]}],
+        SessionStart: [{hooks: [cmd("state.sh idle")]}],
+        SessionEnd: [{hooks: [cmd("state.sh clear")]}]
       }' \
     "$settings" >"$tmp"; then
     mv "$tmp" "$settings"
-    print "claude settings -> claude-usage harvester + state hooks"
+    print "claude settings -> statusline + agent state hooks"
   else
     rm -f "$tmp"
     print -u2 "skip claude settings: jq edit failed"

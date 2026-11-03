@@ -49,6 +49,8 @@ CYAN="#7dcfff"
 GREEN="#9ece6a"
 YELLOW="#e0af68"
 RED="#f7768e"
+PURPLE="#bb9af7"
+DIM="#565f89"
 
 # green under 70%, yellow under 90%, red above — same as the old status line
 pct_color() {
@@ -84,6 +86,18 @@ window() {
 
 body=""
 
+# model · version, stamped on the window by scripts/statusline.sh
+if [ -n "$window_id" ]; then
+	IFS=$'\x1f' read -r model version <<EOF
+$(tmux display -p -t "$window_id" '#{@claude_model}'$'\x1f''#{@claude_version}' 2>/dev/null)
+EOF
+	if [ -n "${model:-}" ]; then
+		body+="#[fg=$PURPLE,bg=$DARK,bold]󰚩 $model#[nobold]"
+		[ -n "${version:-}" ] && body+="#[fg=$DIM] v$version"
+		body+="#[fg=$DIM] │ "
+	fi
+fi
+
 if window "$five_pct" "$five_reset"; then
 	body+="#[fg=$BLUE,bg=$DARK]󰥔 #[fg=$(pct_color "$REPLY_PCT")]${REPLY_PCT}%"
 	if [ -n "$REPLY_RESET" ]; then
@@ -98,5 +112,7 @@ fi
 
 [ -n "$body" ] || exit 0
 
-# rounded capsule caps (U+E0B6 / U+E0B4), matching the other status capsules
-printf '#[fg=%s,bg=default]%s#[fg=%s,bg=default] ' "$DARK" "$body" "$DARK"
+# rounded capsule caps (U+E0B6 / U+E0B4), matching the other status capsules;
+# byte escapes so editors and tools can't silently drop the private-use glyphs
+L=$'\xee\x82\xb6' R=$'\xee\x82\xb4'
+printf '#[fg=%s,bg=default]%s#[bg=%s]%s#[fg=%s,bg=default]%s ' "$DARK" "$L" "$DARK" "$body" "$DARK" "$R"

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-# Claude Code Stop hook — posts a clickable macOS notification when a claude
-# session finishes while you're looking elsewhere. Clicking it jumps to the
+# Claude Code Stop / PermissionRequest hook — posts a clickable macOS
+# notification when a claude session finishes or needs you while you're
+# looking elsewhere. Clicking it jumps to the
 # exact tmux session + window (via scripts/focus-window.sh) and raises
 # Ghostty. Skipped when Ghostty is frontmost AND the pane's window is the one
 # currently on screen — you're already watching it.
@@ -9,6 +10,13 @@
 set -uo pipefail
 
 [ -n "${TMUX_PANE:-}" ] || exit 0
+
+# done (Stop hook) or waiting (permission prompt / question for you)
+kind="${1:-done}"
+case "$kind" in
+waiting) title="✋ Claude needs you" sound="Glass" ;;
+*) title="✳ Claude done" sound="default" ;;
+esac
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GHOSTTY_ID="com.mitchellh.ghostty"
@@ -48,11 +56,11 @@ if [[ "$front" == *"$GHOSTTY_ID"* ]] && [ "${win_active:-0}" = 1 ] && [ "${attac
 fi
 
 "$NOTIFIER" \
-	-title "✳ Claude done" \
+	-title "$title" \
 	-subtitle "$project" \
 	-message "session $session · window $win_name" \
 	-group "claude-$win_id" \
-	-sound default \
+	-sound "$sound" \
 	-appIcon "$DIR/../assets/claude.png" \
 	-execute "$DIR/focus-window.sh '$session' '$win_id'" \
 	>/dev/null 2>&1 || true

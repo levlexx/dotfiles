@@ -72,6 +72,13 @@ New terminals attach to the `main` tmux session automatically.
 
 Sessions persist and auto-restore (resurrect + continuum).
 
+Claude windows are named after the session's task title, and their tab shows
+the agent state: spinner = working, pulsing bell = waiting for you (also a
+macOS notification), check = finished and not seen yet, ✗ = API error,
+robot = idle. Next to the session name, a capsule counts states across all
+sessions. Inside Claude, a capsule row under the prompt shows model · effort,
+context bar, branch / worktree / PR, lines changed, and session time.
+
 ### Neovim (leader = `Space`)
 
 | Key | Action |
