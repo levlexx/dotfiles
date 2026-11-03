@@ -19,6 +19,8 @@ brew "gh"
 # secret scan in the global pre-commit hook
 brew "gitleaks"
 brew "glow"
+# pprof graph view (flame graphs work without it)
+brew "graphviz"
 brew "git-delta"
 brew "hyperfine"
 brew "jq"

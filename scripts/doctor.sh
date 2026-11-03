@@ -48,7 +48,7 @@ if command -v mise >/dev/null; then
 else
 	fail "mise not installed"
 fi
-for bin in gopls tree-sitter typescript-language-server; do
+for bin in gopls dlv benchstat oha dot tree-sitter typescript-language-server; do
 	if command -v "$bin" >/dev/null || mise which "$bin" >/dev/null 2>&1; then
 		ok "$bin"
 	else

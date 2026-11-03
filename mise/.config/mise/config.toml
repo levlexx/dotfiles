@@ -31,6 +31,8 @@ go = "1.26.4"
 "aqua:GoogleCloudPlatform/cloud-sql-proxy" = "2.27.0"
 # DigitalOcean CLI
 "aqua:digitalocean/doctl" = "2.1.0"
+# HTTP load generator with a live TUI (profile under load: oha + gprof)
+"aqua:hatoo/oha" = "1.16.0"
 "aqua:tilt-dev/tilt" = "0.37.4"
 "aqua:go-task/task" = "3.51.1"
 "aqua:crate-ci/typos" = "1.48.0"
@@ -60,6 +62,8 @@ go install mvdan.cc/gofumpt@latest
 go install honnef.co/go/tools/cmd/staticcheck@latest
 go install github.com/go-delve/delve/cmd/dlv@latest
 go install golang.org/x/vuln/cmd/govulncheck@latest
+# before/after benchmark statistics (gbench)
+go install golang.org/x/perf/cmd/benchstat@latest
 
 # Keep golangci-lint under the same mise-managed Go toolchain instead of using
 # Homebrew or a curl installer.

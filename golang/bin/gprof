@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+#
+# gprof: capture a Go profile from a running service and open it.
+#
+#   gprof init [dir]            add the debug server (pprof, fgprof, flight
+#                               recorder) to this module, default internal/debugsrv
+#   gprof <kind> [seconds] [opts]
+#       kinds: cpu (30s) heap allocs goroutine mutex block
+#              fgprof (30s, wall clock: CPU + I/O waits)
+#              trace (5s) flight (last ~10s, flight recorder)
+#       -a host:port   service debug address (default $GPROF_ADDR or localhost:6060)
+#       -k target      pod, deploy/name or svc/name: port-forwards to it first
+#                      ("-k ?" picks a pod with fzf); remote port $GPROF_PORT (6060)
+#       -n             don't open a viewer, print the top functions instead
+#   gprof diff <base> <new>     what changed between two profiles (flame graph)
+#   gprof top <file>            top functions as text
+#   gprof open <file>           open a saved profile
+#   gprof ls                    saved profiles, newest first
+#
+# Profiles land in <repo>/.prof (globally gitignored) named
+# <time>-<kind>.pb.gz, so before/after pairs are easy to diff.
+
+set -euo pipefail
+
+die() {
+	printf 'gprof: %s\n' "$*" >&2
+	exit 1
+}
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+dir="$root/.prof"
+template="${DOTFILES_DIR:-$HOME/dotfiles}/golang/templates/debugsrv/debugsrv.go"
+
+pprof_view() { # file [extra pprof flags...]
+	local file="$1"
+	shift
+	go tool pprof -http=localhost:0 "$@" "$file"
+}
+
+pprof_top() { # file [extra pprof flags...]
+	local file="$1"
+	shift
+	go tool pprof -top -nodecount="${GPROF_TOP:-25}" "$@" "$file" 2>/dev/null
+}
+
+cmd_init() {
+	local target="${1:-internal/debugsrv}"
+	[ -f "$root/go.mod" ] || die "no go.mod in $root"
+	[ -e "$root/$target/debugsrv.go" ] && die "$target/debugsrv.go already exists"
+	mkdir -p "$root/$target"
+	cp "$template" "$root/$target/debugsrv.go"
+	(cd "$root" && go get github.com/felixge/fgprof@latest >/dev/null 2>&1)
+	local module
+	module="$(cd "$root" && go list -m)"
+	cat <<EOF
+added $target/debugsrv.go
+next:
+  1. in main():   debugsrv.Start()   (import "$module/$target")
+  2. run with:    DEBUG_ADDR=localhost:6060
+  3. profile:     gprof cpu   |   gprof heap   |   gprof cpu -k deploy/<name>
+EOF
+}
+
+forward_pid=""
+cleanup() { [ -n "$forward_pid" ] && kill "$forward_pid" 2>/dev/null || true; }
+trap cleanup EXIT
+
+port_forward() { # target -> sets addr
+	local target="$1" log port
+	if [ "$target" = "?" ]; then
+		target="pod/$(kubectl get pods --no-headers -o custom-columns=:metadata.name |
+			fzf --height=40% --reverse --prompt='pod › ')" || exit 1
+	fi
+	log="$(mktemp)"
+	kubectl port-forward "$target" ":${GPROF_PORT:-6060}" >"$log" 2>&1 &
+	forward_pid=$!
+	for _ in $(seq 50); do
+		port="$(sed -n 's/^Forwarding from 127\.0\.0\.1:\([0-9]*\).*/\1/p' "$log" | head -1)"
+		[ -n "$port" ] && break
+		kill -0 "$forward_pid" 2>/dev/null || die "port-forward failed: $(cat "$log")"
+		sleep 0.1
+	done
+	rm -f "$log"
+	[ -n "$port" ] || die "port-forward to $target timed out"
+	addr="127.0.0.1:$port"
+	printf 'gprof: %s -> %s\n' "$target" "$addr" >&2
+}
+
+cmd_capture() {
+	local kind="$1"
+	shift
+	local seconds="" addr="${GPROF_ADDR:-localhost:6060}" k8s="" open=1
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		-a) addr="$2"; shift 2 ;;
+		-k) k8s="$2"; shift 2 ;;
+		-n) open=0; shift ;;
+		[0-9]*) seconds="$1"; shift ;;
+		*) die "unknown option $1" ;;
+		esac
+	done
+
+	local path viewer=pprof flags=()
+	case "$kind" in
+	cpu) path="/debug/pprof/profile?seconds=${seconds:-30}" ;;
+	heap) path="/debug/pprof/heap?gc=1" ;;
+	allocs) path="/debug/pprof/allocs"; flags=(-sample_index=alloc_space) ;;
+	goroutine) path="/debug/pprof/goroutine" ;;
+	mutex) path="/debug/pprof/mutex" ;;
+	block) path="/debug/pprof/block" ;;
+	fgprof) path="/debug/fgprof?seconds=${seconds:-30}" ;;
+	trace) path="/debug/pprof/trace?seconds=${seconds:-5}"; viewer=trace ;;
+	flight) path="/debug/flight"; viewer=trace ;;
+	*) die "unknown kind $kind (see gprof -h)" ;;
+	esac
+
+	[ -n "$k8s" ] && port_forward "$k8s"
+
+	mkdir -p "$dir"
+	local ext="pb.gz"
+	[ "$viewer" = trace ] && ext="trace"
+	local file
+	file="$dir/$(date +%Y%m%d-%H%M%S)-$kind.$ext"
+	printf 'gprof: %s from %s%s\n' "$kind" "$addr" "${seconds:+ (${seconds}s)}" >&2
+	curl -fsS --max-time "$((${seconds:-30} + 30))" -o "$file" "http://$addr$path" ||
+		{ rm -f "$file"; die "capture failed: is the service running with DEBUG_ADDR=$addr? (gprof init)"; }
+	cleanup
+	forward_pid=""
+	printf '%s\n' "$file"
+
+	if [ "$viewer" = trace ]; then
+		[ "$open" = 1 ] && go tool trace "$file"
+		return 0
+	fi
+	if [ "$open" = 1 ]; then
+		pprof_view "$file" "${flags[@]}"
+	else
+		pprof_top "$file" "${flags[@]}"
+	fi
+}
+
+case "${1:-}" in
+"" | -h | --help) sed -n '3,25p' "$0" | sed 's/^# \{0,1\}//' ;;
+init) shift; cmd_init "$@" ;;
+diff)
+	[ $# -eq 3 ] || die "usage: gprof diff <base> <new>"
+	pprof_view "$3" -diff_base="$2"
+	;;
+top) [ $# -eq 2 ] || die "usage: gprof top <file>"; pprof_top "$2" ;;
+open)
+	[ $# -eq 2 ] || die "usage: gprof open <file>"
+	case "$2" in
+	*.trace) go tool trace "$2" ;;
+	*) pprof_view "$2" ;;
+	esac
+	;;
+ls) ls -1t "$dir" 2>/dev/null | sed "s|^|$dir/|" ;;
+*) kind="$1"; shift; cmd_capture "$kind" "$@" ;;
+esac

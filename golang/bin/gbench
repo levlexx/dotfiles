@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+#
+# gbench: Go benchmarks with a before/after comparison.
+#
+#   gbench [-c N] [-l label] [regex] [packages...]
+#       runs go test -run '^$' -bench <regex> -benchmem -count N (default 10)
+#       on <packages> (default ./...), saves .bench/<label>.txt (label: short
+#       commit, "-dirty" with local changes) and compares it with the
+#       previous run via benchstat
+#   gbench cmp [old] [new]      benchstat two runs (default: the two newest)
+#   gbench prof [-n] <regex> <pkg>
+#                               CPU + memory profile of one benchmark, opens
+#                               the CPU flame graph (-n: top lists as text)
+#   gbench ls                   saved runs, newest first
+#
+# Typical loop: gbench BenchmarkParse ./parser  ->  optimize  ->  same again;
+# benchstat prints the delta and whether it is significant (p < 0.05).
+
+set -euo pipefail
+
+die() {
+	printf 'gbench: %s\n' "$*" >&2
+	exit 1
+}
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+dir="$root/.bench"
+
+need_benchstat() {
+	command -v benchstat >/dev/null || die "benchstat missing (mise run install-go-tools)"
+}
+
+label_now() {
+	local label
+	label="$(git -C "$root" rev-parse --short HEAD 2>/dev/null || date +%Y%m%d-%H%M%S)"
+	if [ -n "$(git -C "$root" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+		# uncommitted runs never overwrite each other: before/after edits
+		label="$label-dirty-$(date +%H%M%S)"
+	fi
+	printf '%s' "$label"
+}
+
+# benchstat labels columns with the argument: name=file keeps them short
+stat() { benchstat "$(basename "$1" .txt)=$1" "$(basename "$2" .txt)=$2"; }
+
+newest() { ls -1t "$dir"/*.txt 2>/dev/null | sed -n "${1}p"; }
+
+cmd_run() {
+	local count="${GBENCH_COUNT:-10}" label=""
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		-c) count="$2"; shift 2 ;;
+		-l) label="$2"; shift 2 ;;
+		*) break ;;
+		esac
+	done
+	local regex="${1:-.}"
+	[ $# -gt 0 ] && shift
+	local pkgs=("${@:-./...}")
+	label="${label:-$(label_now)}"
+
+	mkdir -p "$dir"
+	local out="$dir/$label.txt" prev
+	prev=""
+	while IFS= read -r f; do
+		[ "$f" != "$out" ] && { prev="$f"; break; }
+	done < <(ls -1t "$dir"/*.txt 2>/dev/null)
+
+	printf 'gbench: %s x%s on %s -> %s\n' "$regex" "$count" "${pkgs[*]}" "${out#"$root"/}" >&2
+	go test -run '^$' -bench "$regex" -benchmem -count "$count" "${pkgs[@]}" | tee "$out.tmp"
+	mv "$out.tmp" "$out"
+
+	if [ -n "$prev" ]; then
+		need_benchstat
+		printf '\n== %s vs %s ==\n' "$(basename "$prev" .txt)" "$label"
+		stat "$prev" "$out"
+	fi
+}
+
+cmd_cmp() {
+	need_benchstat
+	local old="${1:-$(newest 2)}" new="${2:-$(newest 1)}"
+	[ -n "$old" ] && [ -n "$new" ] || die "need two runs in $dir (gbench ls)"
+	[ -f "$old" ] || old="$dir/$old.txt"
+	[ -f "$new" ] || new="$dir/$new.txt"
+	stat "$old" "$new"
+}
+
+cmd_prof() {
+	local open=1
+	[ "${1:-}" = -n ] && { open=0; shift; }
+	[ $# -eq 2 ] || die "usage: gbench prof [-n] <regex> <package>"
+	local prof="$root/.prof" stamp
+	stamp="$(date +%Y%m%d-%H%M%S)"
+	mkdir -p "$prof"
+	local cpu="$prof/$stamp-bench-cpu.pb.gz" mem="$prof/$stamp-bench-mem.pb.gz"
+	go test -run '^$' -bench "$1" -benchmem -count 1 \
+		-cpuprofile "$cpu" -memprofile "$mem" -o "$prof/$stamp.test" "$2"
+	printf 'cpu: %s\nmem: %s  (gprof open, or -sample_index=alloc_space)\n' "$cpu" "$mem"
+	if [ "$open" = 1 ]; then
+		go tool pprof -http=localhost:0 "$prof/$stamp.test" "$cpu"
+	else
+		go tool pprof -top -cum -nodecount="${GPROF_TOP:-25}" "$prof/$stamp.test" "$cpu" 2>/dev/null
+		go tool pprof -top -sample_index=alloc_space -nodecount="${GPROF_TOP:-25}" "$prof/$stamp.test" "$mem" 2>/dev/null
+	fi
+}
+
+case "${1:-}" in
+-h | --help) sed -n '3,20p' "$0" | sed 's/^# \{0,1\}//' ;;
+cmp) shift; cmd_cmp "$@" ;;
+prof) shift; cmd_prof "$@" ;;
+ls) ls -1t "$dir" 2>/dev/null | sed "s|^|$dir/|" ;;
+*) cmd_run "$@" ;;
+esac
