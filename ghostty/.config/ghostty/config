@@ -1,5 +1,7 @@
 
-theme = Tokyo Night
+# follows macOS appearance; tmux (claude-usage/scripts/animate.sh) and nvim
+# (plugins/theme.lua) switch with it
+theme = light:TokyoNight Day,dark:Tokyo Night
 font-family = JetBrainsMono Nerd Font
 font-feature = -calt
 font-feature = -liga
