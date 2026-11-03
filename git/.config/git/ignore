@@ -4,4 +4,7 @@
 node_modules/
 .git/
 .DS_Store
+# gprof / gbench output
+.prof/
+.bench/
 Session.vim

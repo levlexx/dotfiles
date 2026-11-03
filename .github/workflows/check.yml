@@ -26,6 +26,7 @@ jobs:
             tmux/claude-usage/claude-usage.tmux \
             tmux/scripts/*.sh \
             claude/bin/ccp \
+            golang/bin/* \
             claude/hooks/format.sh \
             scripts/doctor.sh \
             git/.config/git/hooks/*

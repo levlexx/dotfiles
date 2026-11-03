@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# dlvk: debug a Go service running in Kubernetes (k3d, DOKS, ...) or Docker
+# from nvim.
+#
+#   dlvk init                 add Dockerfile.debug to this repo (delve
+#                             headless on :2345, optimizations off)
+#   dlvk [target]             port-forward delve from a pod to
+#                             localhost:38697; target: pod, deploy/name,
+#                             svc/name, or none to pick a pod with fzf
+#
+# Then in nvim: <leader>dc -> "Attach Delve in container (/src)".
+# Docker instead of k8s: docker run -p 38697:2345 <image>, same nvim config.
+
+set -euo pipefail
+
+die() {
+	printf 'dlvk: %s\n' "$*" >&2
+	exit 1
+}
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+template="${DOTFILES_DIR:-$HOME/dotfiles}/golang/templates/Dockerfile.debug"
+local_port="${DLVK_PORT:-38697}"
+
+case "${1:-}" in
+-h | --help) sed -n '3,14p' "$0" | sed 's/^# \{0,1\}//' ;;
+init)
+	[ -e "$root/Dockerfile.debug" ] && die "Dockerfile.debug already exists"
+	cp "$template" "$root/Dockerfile.debug"
+	cat <<'EOF'
+added Dockerfile.debug (set MAIN to your main package)
+k3d:   docker build -f Dockerfile.debug -t app:debug . && k3d image import app:debug
+       kubectl set image deploy/<name> <container>=app:debug && dlvk deploy/<name>
+docker: docker build -f Dockerfile.debug -t app:debug . && docker run --rm -p 38697:2345 app:debug
+EOF
+	;;
+*)
+	target="${1:-}"
+	if [ -z "$target" ]; then
+		target="pod/$(kubectl get pods --no-headers -o custom-columns=:metadata.name |
+			fzf --height=40% --reverse --prompt='pod › ')" || exit 1
+	fi
+	printf 'dlvk: %s:2345 -> localhost:%s (Ctrl-C to stop)\n' "$target" "$local_port"
+	printf 'nvim: <leader>dc -> "Attach Delve in container (/src)"\n'
+	exec kubectl port-forward "$target" "$local_port:2345"
+	;;
+esac

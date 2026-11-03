@@ -192,6 +192,17 @@ local function setup_go(dap)
       host = "127.0.0.1",
       port = 38697,
     },
+    {
+      -- Dockerfile.debug builds in /src (dlvk init); map it to this checkout
+      -- so breakpoints line up. Pod: dlvk deploy/<name>; Docker: -p 38697:2345
+      type = "go",
+      name = "Attach Delve in container (/src)",
+      request = "attach",
+      mode = "remote",
+      host = "127.0.0.1",
+      port = 38697,
+      substitutePath = { { from = "${workspaceFolder}", to = "/src" } },
+    },
   }
 end
 

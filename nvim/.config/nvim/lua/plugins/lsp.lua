@@ -93,6 +93,19 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("n", "<leader>cS", function()
       require("plugins.fzf").run("lsp_workspace_symbols")
     end, "Workspace symbols")
+
+    -- Go: compiler optimization details as diagnostics for this package
+    -- (heap escapes, inlining, bounds and nil checks); toggle again to hide
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client and client.name == "gopls" then
+      map("n", "<leader>ce", function()
+        client:exec_cmd({
+          title = "Toggle compiler optimization details",
+          command = "gopls.gc_details",
+          arguments = { vim.uri_from_bufnr(bufnr) },
+        }, { bufnr = bufnr })
+      end, "Escape analysis (Go)")
+    end
   end,
 })
 
@@ -116,6 +129,9 @@ vim.lsp.config("gopls", {
       vulncheck = "Prompt",
       usePlaceholders = true,
       completeUnimported = true,
+      -- what <leader>ce shows: allocations escaping to the heap, inlining
+      -- decisions, bounds checks, nil checks
+      annotations = { escape = true, inline = true, bounds = true, ["nil"] = true },
       analyses = {
         nilness = true,
         shadow = true,

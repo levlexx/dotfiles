@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1
+#
+# Debug image: the service runs under delve (headless, :2345). Added by
+# `dlvk init` (dotfiles). Sources are built in /src, which the nvim config
+# "Attach Delve in container (/src)" maps back to your checkout.
+#
+#   docker build -f Dockerfile.debug -t app:debug .
+#   docker run --rm -p 8080:8080 -p 38697:2345 app:debug
+#   k3d image import app:debug   (then point the deployment at it; dlvk)
+#
+# Never ship this image: optimizations are off and delve accepts anyone who
+# can reach :2345.
+
+ARG GO_VERSION=1.26
+
+FROM golang:${GO_VERSION} AS build
+WORKDIR /src
+RUN CGO_ENABLED=0 go install github.com/go-delve/delve/cmd/dlv@latest
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+# main package to debug, e.g. ./cmd/server
+ARG MAIN=.
+# -N -l: no optimizations or inlining, so breakpoints and variables work
+RUN CGO_ENABLED=0 go build -gcflags="all=-N -l" -o /app "${MAIN}"
+
+FROM gcr.io/distroless/static-debian12
+COPY --from=build /go/bin/dlv /dlv
+COPY --from=build /app /app
+EXPOSE 8080 2345
+ENTRYPOINT ["/dlv", "exec", "/app", "--headless", "--listen=:2345", "--api-version=2", "--accept-multiclient", "--continue", "--"]

@@ -44,6 +44,12 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `dossh` / `dok8s` | ssh into a droplet / save a DOKS kubeconfig (fzf) |
 | `dologs [-f]` / `dodeploy` | App Platform runtime logs / redeploy (fzf) |
 | `Ctrl-G` → `doctl` | droplets, App Platform, DOKS, registry, databases, DNS cheats |
+| `gprof cpu` / `heap` / `allocs` / `fgprof` / `trace` / `flight` | profile a running Go service, open the flame graph (`-k deploy/x` for a pod, `gprof init` adds the debug server) |
+| `gprof diff a b` | what changed between two profiles |
+| `gbench <regex> <pkg>` | benchmarks with benchstat vs the previous run (`gbench prof` for its profiles) |
+| `dlvk init` / `dlvk deploy/x` | debug image with delve / port-forward it, then nvim attach |
+| `oha -c 50 -z 30s <url>` | load test with a live TUI |
+| `Ctrl-G` → `go` | profiling, escape analysis, PGO, GOMEMLIMIT, Cloud Profiler, Pyroscope cheats |
 | `mise run doctor` | check this machine against the repo |
 | `cw <name>` | Claude in an isolated git worktree |
 | `wtinclude` | add `.worktreeinclude` (copy `.env` etc. into agent worktrees) |
@@ -70,6 +76,13 @@ switches gcloud (no `--project`/`--region`), and the prompt shows `gcp
 <project>`. Each Mac binds its own repos, nothing is hardcoded. Claude runs
 read-only gcloud (`list`, `describe`, `logging read`) without asking; the
 optional gcloud MCP server is `ccp mcp gcloud`.
+
+**Go performance.** `gprof init` drops `internal/debugsrv` into a module
+(pprof, fgprof, flight recorder on `DEBUG_ADDR`, loopback only). Profiles go
+to `.prof/`, benchmark runs to `.bench/` (both globally gitignored). In nvim
+`<leader>ce` shows escape analysis and inlining as diagnostics, and the
+`go-perf` Claude agent runs the measure, change, re-measure loop. nvim-dap
+also picks up a repo's `.vscode/launch.json`.
 
 **DigitalOcean per repo** works the same way: `doinit` picks (or creates,
 asking for a token) a doctl context and writes `DIGITALOCEAN_CONTEXT` to
