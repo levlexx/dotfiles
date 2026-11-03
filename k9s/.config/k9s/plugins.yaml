@@ -1,0 +1,61 @@
+# k9s plugins, adapted from github.com/derailed/k9s/tree/master/plugins
+plugins:
+  # tail every container of the selected pods/workload with stern
+  stern:
+    shortCut: Ctrl-Y
+    confirm: false
+    description: "Logs <stern>"
+    scopes:
+      - pods
+      - deployments
+      - statefulsets
+    command: stern
+    background: false
+    args:
+      - --tail
+      - "50"
+      - $FILTER
+      - -n
+      - $NAMESPACE
+      - --context
+      - $CONTEXT
+
+  # ephemeral debug container next to the selected container
+  debug:
+    shortCut: Shift-D
+    description: Debug container (netshoot)
+    dangerous: true
+    scopes:
+      - containers
+    command: bash
+    background: false
+    confirm: true
+    args:
+      - -c
+      - "kubectl debug -it --context $CONTEXT -n $NAMESPACE $POD --target=$NAME --image=nicolaka/netshoot:v0.15 --profile=sysadmin --share-processes"
+
+  # user-supplied values of a helm release
+  helm-values:
+    shortCut: v
+    confirm: false
+    description: Values
+    scopes:
+      - helm
+    command: sh
+    background: false
+    args:
+      - -c
+      - "helm get values $COL-NAME -n $NAMESPACE --kube-context $CONTEXT | bat -l yaml --paging=always"
+
+  # live events for the selected resource
+  watch-events:
+    shortCut: Shift-E
+    confirm: false
+    description: Events
+    scopes:
+      - all
+    command: sh
+    background: false
+    args:
+      - -c
+      - "kubectl events --context $CONTEXT --namespace $NAMESPACE --for $RESOURCE_NAME/$NAME --watch"

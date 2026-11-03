@@ -199,6 +199,11 @@ alias c='clear'
 
 alias lg='lazygit'
 alias ld='lazydocker'
+# k8s: context / namespace pickers (fzf), k9s
+alias kctx='kubectx'
+alias kns='kubens'
+alias k='kubectl'
+alias k9='k9s'
 # claude in an isolated worktree: cw <name>, cw '#123' for a PR
 alias cw='claude --worktree'
 # drop the .worktreeinclude template into the current repo (copies .env etc.

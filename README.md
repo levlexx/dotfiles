@@ -33,6 +33,9 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `ll` / `lt` | eza list / tree |
 | `lg` | lazygit |
 | `ld` | lazydocker |
+| `kctx` / `kns` / `k` | kubectx / kubens (fzf pickers) / kubectl |
+| `k9s` plugins | `Ctrl-Y` stern logs · `Shift-D` debug container · `v` helm values · `Shift-E` events |
+| `mise run doctor` | check this machine against the repo |
 | `cw <name>` | Claude in an isolated git worktree |
 | `wtinclude` | add `.worktreeinclude` (copy `.env` etc. into agent worktrees) |
 | `/commit`, `/pr` | Claude commands: conventional commits, PR with description |

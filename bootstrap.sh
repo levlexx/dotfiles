@@ -228,6 +228,7 @@ link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config
 link "$dotfiles_dir/atuin/.config/atuin/themes" "$HOME/.config/atuin/themes"
 link "$dotfiles_dir/yazi/.config/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
 link "$dotfiles_dir/k9s/.config/k9s/config.yaml" "$HOME/.config/k9s/config.yaml"
+link "$dotfiles_dir/k9s/.config/k9s/plugins.yaml" "$HOME/.config/k9s/plugins.yaml"
 link "$dotfiles_dir/k9s/.config/k9s/skins/tokyonight.yaml" "$HOME/.config/k9s/skins/tokyonight.yaml"
 link "$dotfiles_dir/lazydocker/.config/lazydocker/config.yml" "$HOME/.config/lazydocker/config.yml"
 link "$dotfiles_dir/btop/.config/btop/btop.conf" "$HOME/.config/btop/btop.conf"
