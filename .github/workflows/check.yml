@@ -15,7 +15,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install tools
-        run: brew install shellcheck typos-cli stylua tmux neovim
+        # tree-sitter-cli: nvim-treesitter compiles parsers with it (mise
+        # provides it on the Macs)
+        run: brew install shellcheck typos-cli stylua tmux neovim tree-sitter-cli
 
       - name: shellcheck
         run: |
@@ -51,8 +53,11 @@ jobs:
         run: |
           mkdir -p ~/.config
           ln -s "$PWD/nvim/.config/nvim" ~/.config/nvim
-          # first start installs plugins via vim.pack, second one is the check
-          nvim --headless "+lua vim.defer_fn(function() vim.cmd('qa!') end, 20000)" || true
+          # first start installs plugins (vim.pack is synchronous), then the
+          # parsers with an explicit wait, then the real check
+          nvim --headless +qa || true
+          nvim --headless \
+            "+lua require('nvim-treesitter').install(require('plugins.treesitter').parsers):wait(600000)" +qa
           nvim --headless "+lua vim.defer_fn(function()
             local out = vim.api.nvim_exec2('messages', { output = true }).output
             io.stdout:write(out .. '\n')
