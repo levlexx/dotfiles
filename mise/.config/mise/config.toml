@@ -27,6 +27,8 @@ go = "1.26.4"
 "aqua:kubernetes-sigs/kustomize" = "5.8.1"
 "aqua:jesseduffield/lazydocker" = "0.25.2"
 "aqua:jesseduffield/lazygit" = "0.62.2"
+# Cloud SQL Auth Proxy (Postgres/MySQL on localhost)
+"aqua:GoogleCloudPlatform/cloud-sql-proxy" = "2.27.0"
 "aqua:tilt-dev/tilt" = "0.37.4"
 "aqua:go-task/task" = "3.51.1"
 "aqua:crate-ci/typos" = "1.48.0"

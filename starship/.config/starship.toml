@@ -1,6 +1,6 @@
 add_newline = true
 command_timeout = 800
-format = "$directory$git_branch$git_status$nodejs$golang$c$rust$python$cmd_duration$line_break$character"
+format = "$directory$git_branch$git_status$gcloud$nodejs$golang$c$rust$python$cmd_duration$line_break$character"
 
 [directory]
 truncate_to_repo = true
@@ -11,6 +11,12 @@ format = "[$branch]($style) "
 
 [git_status]
 format = '([\[$all_status$ahead_behind\]]($style) )'
+
+# active gcloud configuration's project (per repo via gcinit + direnv), so a
+# deploy never goes to the wrong project unnoticed; hidden without a project
+[gcloud]
+format = '([gcp $project]($style) )'
+style = "bold blue"
 
 [nodejs]
 format = "[node $version]($style) "

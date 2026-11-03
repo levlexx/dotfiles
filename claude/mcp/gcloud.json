@@ -1,0 +1,5 @@
+{
+  "type": "stdio",
+  "command": "~/.local/share/mise/shims/npx",
+  "args": ["-y", "@google-cloud/gcloud-mcp"]
+}

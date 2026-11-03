@@ -62,6 +62,13 @@ configure_claude_settings() {
       "Read(~/.docker/config.json)", "Read(~/.netrc)", "Read(~/.config/gh/hosts.yml)",
       "Read(~/.local/share/atuin/key)", "Read(~/.claude.json)"
     ] | unique) |
+    # read-only gcloud runs without a prompt; deploy/delete/update still ask
+    .permissions.allow = ((.permissions.allow // []) + [
+      "Bash(gcloud * list)", "Bash(gcloud * list *)",
+      "Bash(gcloud * describe *)", "Bash(gcloud logging read *)",
+      "Bash(gcloud config list)", "Bash(gcloud config get *)",
+      "Bash(gcloud config configurations list)", "Bash(gcloud auth list)"
+    ] | unique) |
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
         UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
@@ -183,6 +190,17 @@ install_gh_extensions() {
   gh extension list | grep -q 'dlvhdr/gh-dash' || gh extension install dlvhdr/gh-dash
 }
 
+# beta + log-streaming: `gcloud beta run services logs tail` (crtail)
+install_gcloud_components() {
+  if ! command -v gcloud >/dev/null 2>&1; then
+    print -u2 "skip gcloud components: gcloud is not installed"
+    return
+  fi
+  gcloud components install beta log-streaming --quiet >/dev/null 2>&1 \
+    && print "gcloud components -> beta log-streaming" \
+    || print -u2 "skip gcloud components: install failed"
+}
+
 install_tmux_plugins() {
   if [[ "${SKIP_TMUX_PLUGINS:-0}" == "1" ]]; then
     print "skip tmux plugins"
@@ -243,6 +261,8 @@ link "$dotfiles_dir/claude/hooks" "$HOME/.claude/hooks"
 link "$dotfiles_dir/claude/bin/ccp" "$HOME/.local/bin/ccp"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
+link "$dotfiles_dir/direnv/.config/direnv/direnv.toml" "$HOME/.config/direnv/direnv.toml"
+link "$dotfiles_dir/navi/cheats" "$HOME/.local/share/navi/cheats/dotfiles"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/shaders" "$HOME/.config/ghostty/shaders"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
@@ -253,4 +273,5 @@ install_claude_plugins
 build_bat_cache
 install_gh_extensions
 configure_notifier_icon
+install_gcloud_components
 install_tmux_plugins

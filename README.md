@@ -35,6 +35,11 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `ld` | lazydocker |
 | `kctx` / `kns` / `k` | kubectx / kubens (fzf pickers) / kubectl |
 | `k9s` plugins | `Ctrl-Y` stern logs · `Shift-D` debug container · `v` helm values · `Shift-E` events |
+| `gcinit` | bind this repo to a gcloud configuration (project, region) via `.envrc` |
+| `gcfg` | switch the global gcloud configuration (fzf) |
+| `crlogs` / `crtail` | Cloud Run logs: recent colored / live (`[service]`, fzf when omitted) |
+| `crurl` / `crrev` | service URL (copied) / revisions picker, enter = 100% traffic |
+| `Ctrl-G` → `gcloud` | Cloud Run, Artifact Registry, secrets, SQL, IAM, Pub/Sub cheats |
 | `mise run doctor` | check this machine against the repo |
 | `cw <name>` | Claude in an isolated git worktree |
 | `wtinclude` | add `.worktreeinclude` (copy `.env` etc. into agent worktrees) |
@@ -53,6 +58,19 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `g`, `gst`, `gd`, `gpl`, `gpu`, … | git aliases (see `.zshrc`) |
 
 New terminals attach to the `main` tmux session automatically.
+
+**gcloud per repo.** Run `gcinit` once in a repo: it picks the project and
+region, creates a gcloud configuration named after the repo and writes
+`export CLOUDSDK_ACTIVE_CONFIG_NAME=<name>` to `.envrc`. From then on `cd`
+switches gcloud (no `--project`/`--region`), and the prompt shows `gcp
+<project>`. Each Mac binds its own repos, nothing is hardcoded. Claude runs
+read-only gcloud (`list`, `describe`, `logging read`) without asking; the
+optional gcloud MCP server is `ccp mcp gcloud`.
+
+**direnv** hides the env diff and loading lines. To stop `direnv allow`
+prompts for your own repos, uncomment the `[whitelist]` in
+`direnv/.config/direnv/direnv.toml` (it trusts every `.envrc` under those
+roots, including freshly cloned ones).
 
 ### tmux (prefix `Ctrl-a`)
 
@@ -140,6 +158,8 @@ Leader groups (which-key pops up after `Space`): `f` find · `g` git ·
 | `~/.config/mise/config.toml` | `mise/` |
 | `~/.config/starship.toml`, `~/.config/lazygit` | `starship/`, `lazygit/` |
 | `~/.config/atuin/config.toml` | `atuin/` |
+| `~/.config/direnv/direnv.toml` | `direnv/` |
+| `~/.local/share/navi/cheats/dotfiles` | `navi/cheats/` |
 | `~/.config/btop/btop.conf` | `btop/` |
 | `~/.config/ghostty/*` | `ghostty/` |
 | `~/.config/vale/.vale.ini` | `vale/` |

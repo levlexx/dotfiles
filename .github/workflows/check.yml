@@ -33,6 +33,7 @@ jobs:
       - name: zsh syntax
         run: |
           zsh -n zsh/.zshrc
+          zsh -n zsh/gcloud.zsh
           zsh -n bootstrap.sh
 
       - name: typos

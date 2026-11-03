@@ -98,6 +98,21 @@ if command -v ghostty >/dev/null; then
 fi
 bat --list-themes 2>/dev/null | grep -q tokyonight_night && ok "bat theme cache" || fail "bat theme missing (bat cache --build)"
 
+section "gcloud"
+if command -v gcloud >/dev/null; then
+	acct="$(gcloud auth list --filter=status:ACTIVE --format='value(account)' 2>/dev/null)"
+	[ -n "$acct" ] && ok "gcloud logged in ($acct)" || warn "gcloud not logged in (gcloud auth login)"
+	[ -f "$HOME/.config/gcloud/application_default_credentials.json" ] && ok "application default credentials" ||
+		warn "no ADC for local SDKs (gcloud auth application-default login)"
+	comps="$(gcloud components list --only-local-state --format='value(id)' 2>/dev/null | tr '\n' ' ')"
+	[[ " $comps " == *" log-streaming "* ]] && ok "gcloud beta + log-streaming" ||
+		warn "gcloud log-streaming missing, crtail won't work (./bootstrap.sh)"
+	n="$(gcloud config configurations list --format='value(name)' 2>/dev/null | wc -l | tr -d ' ')"
+	ok "$n gcloud configuration(s) (gcinit binds a repo)"
+else
+	warn "gcloud not installed"
+fi
+
 section "accounts"
 gh auth status >/dev/null 2>&1 && ok "gh logged in" || warn "gh not logged in (gh auth login)"
 atuin status >/dev/null 2>&1 && ok "atuin sync logged in" || warn "atuin sync not set up (atuin login)"

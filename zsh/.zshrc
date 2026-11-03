@@ -217,6 +217,9 @@ wtinclude() {
   fi
   cp ~/dotfiles/claude/worktreeinclude "$root/.worktreeinclude" && print "created $root/.worktreeinclude"
 }
+# gcloud: gcinit, gcfg, crlogs, crtail, crurl, crrev (see the file header)
+[[ -f "$HOME/dotfiles/zsh/gcloud.zsh" ]] && source "$HOME/dotfiles/zsh/gcloud.zsh"
+
 # --------------------------------
 # Git core
 # --------------------------------
