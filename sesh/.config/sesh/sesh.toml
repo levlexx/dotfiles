@@ -1,0 +1,6 @@
+# Pinned sessions for the tmux picker (prefix o); zoxide dirs show up too.
+
+[[session]]
+name = "dotfiles"
+path = "~/dotfiles"
+startup_command = "nvim"

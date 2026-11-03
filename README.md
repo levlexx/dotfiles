@@ -54,6 +54,12 @@ New terminals attach to the `main` tmux session automatically.
 | `prefix Enter` | copy mode (vi keys, `y` → clipboard) |
 | `prefix x` / `X` | kill pane / window |
 | `prefix r` | reload config |
+| `prefix o` | sesh session picker (sessions, pinned, zoxide dirs) |
+| `prefix g` | lazygit popup |
+| `prefix t` | scratch shell popup (same key hides it) |
+| `prefix A` | Claude in a split on the right |
+| `prefix F` | fingers: copy hashes / paths / URLs by hint |
+| `prefix a` / `S` | last window / last session |
 
 Sessions persist and auto-restore (resurrect + continuum).
 

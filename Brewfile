@@ -22,11 +22,15 @@ brew "navi"
 brew "neovim"
 brew "pyroscope-io/brew/pyroscope"
 brew "ripgrep"
+# tmux session picker (prefix o)
+brew "sesh"
 brew "starship"
 brew "stern"
 # clickable macOS notifications for the claude-usage tmux plugin
 brew "terminal-notifier"
 brew "tmux"
+# copy hashes/paths/URLs off the screen with hints (prefix F)
+brew "tmux-fingers"
 brew "vale"
 brew "yazi"
 brew "zsh-autosuggestions"
