@@ -98,6 +98,7 @@ _cache_comp() {
 # docker/task emit fpath-style completion files
 command -v docker >/dev/null 2>&1 && _cache_comp _docker docker completion zsh
 command -v task >/dev/null 2>&1 && _cache_comp _task task --completion zsh
+command -v doctl >/dev/null 2>&1 && _cache_comp _doctl doctl completion zsh
 
 fpath=(
   "$_zsh_comp_cache"
@@ -219,6 +220,8 @@ wtinclude() {
 }
 # gcloud: gcinit, gcfg, crlogs, crtail, crurl, crrev (see the file header)
 [[ -f "$HOME/dotfiles/zsh/gcloud.zsh" ]] && source "$HOME/dotfiles/zsh/gcloud.zsh"
+# DigitalOcean: doinit, doctx, dossh, dologs, dodeploy, dok8s
+[[ -f "$HOME/dotfiles/zsh/doctl.zsh" ]] && source "$HOME/dotfiles/zsh/doctl.zsh"
 
 # --------------------------------
 # Git core

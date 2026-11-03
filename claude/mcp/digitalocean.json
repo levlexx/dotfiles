@@ -1,0 +1,6 @@
+{
+  "type": "stdio",
+  "command": "~/.local/share/mise/shims/npx",
+  "args": ["-y", "@digitalocean/mcp", "--services", "apps,droplets,doks,databases,docr,networking,accounts"],
+  "env": { "DIGITALOCEAN_API_TOKEN": "${DIGITALOCEAN_API_TOKEN}" }
+}

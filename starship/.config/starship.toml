@@ -1,6 +1,6 @@
 add_newline = true
 command_timeout = 800
-format = "$directory$git_branch$git_status$gcloud$nodejs$golang$c$rust$python$cmd_duration$line_break$character"
+format = "$directory$git_branch$git_status$gcloud${env_var.DIGITALOCEAN_CONTEXT}$nodejs$golang$c$rust$python$cmd_duration$line_break$character"
 
 [directory]
 truncate_to_repo = true
@@ -17,6 +17,11 @@ format = '([\[$all_status$ahead_behind\]]($style) )'
 [gcloud]
 format = '([gcp $project]($style) )'
 style = "bold blue"
+
+# doctl context pinned by the repo (doinit + direnv)
+[env_var.DIGITALOCEAN_CONTEXT]
+format = "[do $env_value]($style) "
+style = "bold cyan"
 
 [nodejs]
 format = "[node $version]($style) "

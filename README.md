@@ -40,6 +40,10 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `crlogs` / `crtail` | Cloud Run logs: recent colored / live (`[service]`, fzf when omitted) |
 | `crurl` / `crrev` | service URL (copied) / revisions picker, enter = 100% traffic |
 | `Ctrl-G` → `gcloud` | Cloud Run, Artifact Registry, secrets, SQL, IAM, Pub/Sub cheats |
+| `doinit` / `doctx` | bind this repo to a doctl context via `.envrc` / switch the global one |
+| `dossh` / `dok8s` | ssh into a droplet / save a DOKS kubeconfig (fzf) |
+| `dologs [-f]` / `dodeploy` | App Platform runtime logs / redeploy (fzf) |
+| `Ctrl-G` → `doctl` | droplets, App Platform, DOKS, registry, databases, DNS cheats |
 | `mise run doctor` | check this machine against the repo |
 | `cw <name>` | Claude in an isolated git worktree |
 | `wtinclude` | add `.worktreeinclude` (copy `.env` etc. into agent worktrees) |
@@ -66,6 +70,13 @@ switches gcloud (no `--project`/`--region`), and the prompt shows `gcp
 <project>`. Each Mac binds its own repos, nothing is hardcoded. Claude runs
 read-only gcloud (`list`, `describe`, `logging read`) without asking; the
 optional gcloud MCP server is `ccp mcp gcloud`.
+
+**DigitalOcean per repo** works the same way: `doinit` picks (or creates,
+asking for a token) a doctl context and writes `DIGITALOCEAN_CONTEXT` to
+`.envrc`; the prompt shows `do <context>`. Tokens stay in doctl's own config,
+which Claude is denied from reading; read-only `doctl … list/get` runs
+without a prompt. MCP: `ccp mcp digitalocean` (reads `DIGITALOCEAN_API_TOKEN`
+from the environment).
 
 **direnv** hides the env diff and loading lines. To stop `direnv allow`
 prompts for your own repos, uncomment the `[whitelist]` in

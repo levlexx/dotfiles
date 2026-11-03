@@ -60,14 +60,17 @@ configure_claude_settings() {
       "Read(//**/*.pem)", "Read(//**/*.p12)", "Read(//**/id_rsa*)", "Read(//**/id_ed25519*)",
       "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.config/gcloud/**)", "Read(~/.kube/**)",
       "Read(~/.docker/config.json)", "Read(~/.netrc)", "Read(~/.config/gh/hosts.yml)",
-      "Read(~/.local/share/atuin/key)", "Read(~/.claude.json)"
+      "Read(~/.local/share/atuin/key)", "Read(~/.claude.json)",
+      "Read(~/Library/Application Support/doctl/**)", "Read(~/.config/doctl/**)"
     ] | unique) |
-    # read-only gcloud runs without a prompt; deploy/delete/update still ask
+    # read-only gcloud/doctl runs without a prompt; deploy/delete/update still ask
     .permissions.allow = ((.permissions.allow // []) + [
       "Bash(gcloud * list)", "Bash(gcloud * list *)",
       "Bash(gcloud * describe *)", "Bash(gcloud logging read *)",
       "Bash(gcloud config list)", "Bash(gcloud config get *)",
-      "Bash(gcloud config configurations list)", "Bash(gcloud auth list)"
+      "Bash(gcloud config configurations list)", "Bash(gcloud auth list)",
+      "Bash(doctl * list)", "Bash(doctl * list *)", "Bash(doctl * get *)",
+      "Bash(doctl auth list)", "Bash(doctl apps logs *)"
     ] | unique) |
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {

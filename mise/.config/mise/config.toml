@@ -29,6 +29,8 @@ go = "1.26.4"
 "aqua:jesseduffield/lazygit" = "0.62.2"
 # Cloud SQL Auth Proxy (Postgres/MySQL on localhost)
 "aqua:GoogleCloudPlatform/cloud-sql-proxy" = "2.27.0"
+# DigitalOcean CLI
+"aqua:digitalocean/doctl" = "2.1.0"
 "aqua:tilt-dev/tilt" = "0.37.4"
 "aqua:go-task/task" = "3.51.1"
 "aqua:crate-ci/typos" = "1.48.0"

@@ -113,6 +113,15 @@ else
 	warn "gcloud not installed"
 fi
 
+section "digitalocean"
+if command -v doctl >/dev/null; then
+	ok "doctl $(doctl version 2>/dev/null | awk 'NR==1{print $3}')"
+	ctxs="$(doctl auth list 2>/dev/null | tr '\n' ' ')"
+	if doctl account get >/dev/null 2>&1; then ok "doctl contexts: $ctxs"; else warn "doctl not authenticated (doinit in a repo, or doctl auth init)"; fi
+else
+	warn "doctl not installed (mise install)"
+fi
+
 section "accounts"
 gh auth status >/dev/null 2>&1 && ok "gh logged in" || warn "gh not logged in (gh auth login)"
 atuin status >/dev/null 2>&1 && ok "atuin sync logged in" || warn "atuin sync not set up (atuin login)"
