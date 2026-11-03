@@ -1,0 +1,19 @@
+# Tokyo Night (night) for atuin's search UI
+[theme]
+name = "tokyonight"
+
+[colors]
+AlertInfo = "#9ece6a"
+AlertWarn = "#e0af68"
+AlertError = "#f7768e"
+Annotation = "#7aa2f7"
+Guidance = "#565f89"
+Important = "#ff9e64"
+Title = "#7dcfff"
+Muted = "#565f89"
+SyntaxCommand = "#7aa2f7"
+SyntaxFlag = "#e0af68"
+SyntaxString = "#9ece6a"
+SyntaxVariable = "#bb9af7"
+SyntaxOperator = "#89ddff"
+SyntaxComment = "#565f89"

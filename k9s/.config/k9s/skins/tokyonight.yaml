@@ -1,0 +1,102 @@
+# -----------------------------------------------------------------------------
+# K9s Tokyo Night skin (night variant), laid out like the upstream skins/
+# Background is "default" so Ghostty's translucency shows through.
+# -----------------------------------------------------------------------------
+
+foreground: &foreground "#c0caf5"
+background: &background "default"
+current_line: &current_line "#283457"
+selection: &selection "#292e42"
+comment: &comment "#565f89"
+cyan: &cyan "#7dcfff"
+green: &green "#9ece6a"
+orange: &orange "#ff9e64"
+yellow: &yellow "#e0af68"
+magenta: &magenta "#bb9af7"
+blue: &blue "#7aa2f7"
+red: &red "#f7768e"
+dark: &dark "#1a1b26"
+
+k9s:
+  body:
+    fgColor: *foreground
+    bgColor: *background
+    logoColor: *blue
+  prompt:
+    fgColor: *foreground
+    bgColor: *background
+    suggestColor: *comment
+  info:
+    fgColor: *magenta
+    sectionColor: *foreground
+  dialog:
+    fgColor: *foreground
+    bgColor: *background
+    buttonFgColor: *dark
+    buttonBgColor: *magenta
+    buttonFocusFgColor: *dark
+    buttonFocusBgColor: *blue
+    labelFgColor: *orange
+    fieldFgColor: *foreground
+  frame:
+    border:
+      fgColor: *selection
+      focusColor: *blue
+    menu:
+      fgColor: *foreground
+      keyColor: *blue
+      numKeyColor: *magenta
+    crumbs:
+      fgColor: *dark
+      bgColor: *blue
+      activeColor: *orange
+    status:
+      newColor: *cyan
+      modifyColor: *blue
+      addColor: *green
+      errorColor: *red
+      highlightColor: *orange
+      killColor: *comment
+      completedColor: *comment
+    title:
+      fgColor: *foreground
+      bgColor: *background
+      highlightColor: *orange
+      counterColor: *blue
+      filterColor: *magenta
+  views:
+    charts:
+      bgColor: default
+      defaultDialColors:
+        - *blue
+        - *red
+      defaultChartColors:
+        - *blue
+        - *red
+    table:
+      fgColor: *foreground
+      bgColor: *background
+      cursorFgColor: *foreground
+      cursorBgColor: *current_line
+      header:
+        fgColor: *blue
+        bgColor: *background
+        sorterColor: *cyan
+    xray:
+      fgColor: *foreground
+      bgColor: *background
+      cursorColor: *current_line
+      graphicColor: *blue
+      showIcons: true
+    yaml:
+      keyColor: *magenta
+      colonColor: *blue
+      valueColor: *foreground
+    logs:
+      fgColor: *foreground
+      bgColor: *background
+      indicator:
+        fgColor: *foreground
+        bgColor: *selection
+        toggleOnColor: *green
+        toggleOffColor: *comment
