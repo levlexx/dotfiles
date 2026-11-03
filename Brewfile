@@ -31,6 +31,8 @@ brew "navi"
 brew "neovim"
 brew "pyroscope-io/brew/pyroscope"
 brew "ripgrep"
+# shell lint (also runs in CI)
+brew "shellcheck"
 # tmux session picker (prefix o)
 brew "sesh"
 brew "starship"
