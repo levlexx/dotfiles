@@ -47,7 +47,11 @@ local function angular_root_dir(bufnr, on_dir)
     return
   end
 
-  if has_path(root .. "/angular.json") or has_package(root, "@angular/core") or has_path(root .. "/node_modules/@angular/core") then
+  if
+    has_path(root .. "/angular.json")
+    or has_package(root, "@angular/core")
+    or has_path(root .. "/node_modules/@angular/core")
+  then
     on_dir(root)
   end
 end

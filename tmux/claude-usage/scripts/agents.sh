@@ -10,7 +10,7 @@ set -uo pipefail
 client="$1"
 ESC=$'\033'
 rgb() { printf '%s[38;2;%sm' "$ESC" "$1"; }
-DIM="$(rgb '86;95;137')" FG="$(rgb '192;202;245')" BLUE="$(rgb '122;162;247')" OFF="$ESC[0m"
+DIM="$(rgb '86;95;137')" FG="$(rgb '192;202;245')" BLUE="$(rgb '122;162;247')" OFF="${ESC}[0m"
 
 lines="$(tmux list-windows -a -F '#{session_name}:#{window_index}	#{?@claude_pane,#{@claude_pane},#{pane_id}}	#{@claude_state}	#{window_name}	#{@claude_last}' 2>/dev/null |
 	awk -F'\t' -v dim="$DIM" -v fg="$FG" -v blue="$BLUE" -v off="$OFF" -v esc="$ESC" '

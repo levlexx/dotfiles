@@ -11,7 +11,7 @@ client="$1" current="$2"
 
 windows="$(tmux list-windows -a -F '#{session_name}:#{window_index} #{@claude_state}' 2>/dev/null)"
 
-for want in waiting error done; do
+for want in waiting error 'done'; do
 	targets=()
 	while read -r target state; do
 		[ "$state" = "$want" ] && targets+=("$target")

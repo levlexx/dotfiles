@@ -1,0 +1,60 @@
+name: check
+
+# Catch what used to surface only on the second Mac: shell bugs, Lua
+# formatting, typos, tmux config errors and nvim startup errors.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install shellcheck typos-cli stylua tmux neovim
+
+      - name: shellcheck
+        run: |
+          shellcheck -S warning \
+            tmux/claude-usage/scripts/*.sh \
+            tmux/claude-usage/claude-usage.tmux \
+            tmux/scripts/*.sh \
+            git/.config/git/hooks/*
+
+      - name: zsh syntax
+        run: |
+          zsh -n zsh/.zshrc
+          zsh -n bootstrap.sh
+
+      - name: typos
+        run: typos
+
+      - name: stylua
+        run: stylua --check nvim/.config/nvim
+
+      - name: tmux config loads
+        run: |
+          mkdir -p ~/.tmux
+          ln -s "$PWD/tmux/claude-usage" ~/.tmux/claude-usage
+          ln -s "$PWD/tmux/scripts" ~/.tmux/scripts
+          tmux -L ci -f /dev/null new-session -d -s ci
+          # source-file fails on parse errors; missing plugins only log
+          tmux -L ci source-file tmux/.tmux.conf
+          tmux -L ci show -g status-left >/dev/null
+          tmux -L ci kill-server
+
+      - name: nvim starts without errors
+        run: |
+          mkdir -p ~/.config
+          ln -s "$PWD/nvim/.config/nvim" ~/.config/nvim
+          # first start installs plugins via vim.pack, second one is the check
+          nvim --headless "+lua vim.defer_fn(function() vim.cmd('qa!') end, 20000)" || true
+          nvim --headless "+lua vim.defer_fn(function()
+            local out = vim.api.nvim_exec2('messages', { output = true }).output
+            io.stdout:write(out .. '\n')
+            vim.cmd(out:find('Error') and 'cquit 1' or 'qa!')
+          end, 5000)"

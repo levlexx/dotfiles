@@ -103,67 +103,152 @@ end
 
 local map = vim.keymap.set
 
-map("n", "<leader>db", with_dap(function(dap)
-  dap.toggle_breakpoint()
-end), { desc = "Toggle breakpoint" })
-map("n", "<leader>dB", with_dap(function(dap)
-  dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-end), { desc = "Conditional breakpoint" })
-map("n", "<leader>dc", with_dap(function(dap)
-  dap.continue()
-end), { desc = "Continue" })
-map("n", "<leader>di", with_dap(function(dap)
-  dap.step_into()
-end), { desc = "Step into" })
-map("n", "<leader>do", with_dap(function(dap)
-  dap.step_over()
-end), { desc = "Step over" })
-map("n", "<leader>dO", with_dap(function(dap)
-  dap.step_out()
-end), { desc = "Step out" })
-map("n", "<leader>dr", with_dap(function(dap)
-  dap.repl.open()
-end), { desc = "Open REPL" })
-map("n", "<leader>dl", with_dap(function(dap)
-  dap.run_last()
-end), { desc = "Run last debug session" })
-map("n", "<leader>dt", with_dap(function(_, _, config)
-  config.debug_nearest_go_test()
-end), { desc = "Debug nearest Go test" })
-map("n", "<leader>du", with_dap(function(_, dapui)
-  if dapui ~= nil then
-    dapui.toggle()
-  else
-    vim.notify("nvim-dap-ui is not available", vim.log.levels.WARN)
-  end
-end), { desc = "Toggle debug UI" })
+map(
+  "n",
+  "<leader>db",
+  with_dap(function(dap)
+    dap.toggle_breakpoint()
+  end),
+  { desc = "Toggle breakpoint" }
+)
+map(
+  "n",
+  "<leader>dB",
+  with_dap(function(dap)
+    dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+  end),
+  { desc = "Conditional breakpoint" }
+)
+map(
+  "n",
+  "<leader>dc",
+  with_dap(function(dap)
+    dap.continue()
+  end),
+  { desc = "Continue" }
+)
+map(
+  "n",
+  "<leader>di",
+  with_dap(function(dap)
+    dap.step_into()
+  end),
+  { desc = "Step into" }
+)
+map(
+  "n",
+  "<leader>do",
+  with_dap(function(dap)
+    dap.step_over()
+  end),
+  { desc = "Step over" }
+)
+map(
+  "n",
+  "<leader>dO",
+  with_dap(function(dap)
+    dap.step_out()
+  end),
+  { desc = "Step out" }
+)
+map(
+  "n",
+  "<leader>dr",
+  with_dap(function(dap)
+    dap.repl.open()
+  end),
+  { desc = "Open REPL" }
+)
+map(
+  "n",
+  "<leader>dl",
+  with_dap(function(dap)
+    dap.run_last()
+  end),
+  { desc = "Run last debug session" }
+)
+map(
+  "n",
+  "<leader>dt",
+  with_dap(function(_, _, config)
+    config.debug_nearest_go_test()
+  end),
+  { desc = "Debug nearest Go test" }
+)
+map(
+  "n",
+  "<leader>du",
+  with_dap(function(_, dapui)
+    if dapui ~= nil then
+      dapui.toggle()
+    else
+      vim.notify("nvim-dap-ui is not available", vim.log.levels.WARN)
+    end
+  end),
+  { desc = "Toggle debug UI" }
+)
 
-map("n", "<leader>da", with_dap(function(dap)
-  dap.run({
-    type = "go",
-    name = "Attach to running process",
-    request = "attach",
-    mode = "local",
-    processId = require("dap.utils").pick_process,
-  })
-end), { desc = "Attach Go process" })
-map("n", "<leader>dC", with_dap(function(_, _, config)
-  config.debug_cloud_run_local()
-end), { desc = "Debug Cloud Run local" })
-map("n", "<leader>df", with_dap(function(_, _, config)
-  config.debug_current_file()
-end), { desc = "Debug current file" })
-map("n", "<leader>dp", with_dap(function(_, _, config)
-  config.debug_go_package_tests()
-end), { desc = "Debug package tests" })
-map("n", "<leader>ds", with_dap(function(_, _, config)
-  config.debug_go_service()
-end), { desc = "Debug Go service env" })
-map("n", "<leader>dv", with_dap(function(_, dapui)
-  if dapui ~= nil then
-    dapui.eval(nil, { enter = true })
-  end
-end), { desc = "Preview variable" })
-map("n", "<leader>dx", with_dap(function(dap)
-  dap.terminate()
-end), { desc = "Terminate debug session" })
+map(
+  "n",
+  "<leader>da",
+  with_dap(function(dap)
+    dap.run({
+      type = "go",
+      name = "Attach to running process",
+      request = "attach",
+      mode = "local",
+      processId = require("dap.utils").pick_process,
+    })
+  end),
+  { desc = "Attach Go process" }
+)
+map(
+  "n",
+  "<leader>dC",
+  with_dap(function(_, _, config)
+    config.debug_cloud_run_local()
+  end),
+  { desc = "Debug Cloud Run local" }
+)
+map(
+  "n",
+  "<leader>df",
+  with_dap(function(_, _, config)
+    config.debug_current_file()
+  end),
+  { desc = "Debug current file" }
+)
+map(
+  "n",
+  "<leader>dp",
+  with_dap(function(_, _, config)
+    config.debug_go_package_tests()
+  end),
+  { desc = "Debug package tests" }
+)
+map(
+  "n",
+  "<leader>ds",
+  with_dap(function(_, _, config)
+    config.debug_go_service()
+  end),
+  { desc = "Debug Go service env" }
+)
+map(
+  "n",
+  "<leader>dv",
+  with_dap(function(_, dapui)
+    if dapui ~= nil then
+      dapui.eval(nil, { enter = true })
+    end
+  end),
+  { desc = "Preview variable" }
+)
+map(
+  "n",
+  "<leader>dx",
+  with_dap(function(dap)
+    dap.terminate()
+  end),
+  { desc = "Terminate debug session" }
+)

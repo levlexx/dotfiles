@@ -42,9 +42,17 @@ local function setup()
   dashboard.section.buttons.val = {
     dashboard.button("f", "  Find files", "<cmd>lua require('plugins.fzf').run('files')<cr>"),
     dashboard.button("r", "󰋚  Recent files", "<cmd>lua require('plugins.fzf').run('oldfiles')<cr>"),
-    dashboard.button("p", "󰉋  Projects", "<cmd>lua require('plugins.fzf').run('files', { cwd = vim.fn.expand('~/Projects') })<cr>"),
+    dashboard.button(
+      "p",
+      "󰉋  Projects",
+      "<cmd>lua require('plugins.fzf').run('files', { cwd = vim.fn.expand('~/Projects') })<cr>"
+    ),
     dashboard.button("g", "  Git files", "<cmd>lua require('plugins.fzf').run('git_files')<cr>"),
-    dashboard.button("s", "󰦛  Restore session", "<cmd>if filereadable('Session.vim') | source Session.vim | else echo 'No Session.vim' | endif<cr>"),
+    dashboard.button(
+      "s",
+      "󰦛  Restore session",
+      "<cmd>if filereadable('Session.vim') | source Session.vim | else echo 'No Session.vim' | endif<cr>"
+    ),
     dashboard.button("e", "󰙅  Explorer", "<cmd>lua require('plugins.explorer').toggle()<cr>"),
     dashboard.button("q", "󰅚  Quit", "<cmd>qa<cr>"),
   }
