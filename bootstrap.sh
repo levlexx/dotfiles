@@ -52,6 +52,16 @@ configure_claude_settings() {
     # compact long sessions at 400K instead of ~967K on 1M-context models:
     # every turn resends the whole context; keep a value set by hand
     .autoCompactWindow //= 400000 |
+    # keep secrets out of the model context: Claude file tools and the
+    # cat/head/sed it runs cannot read these (kubectl and co. still can)
+    .permissions.deny = ((.permissions.deny // []) + [
+      "Read(//**/.env)", "Read(//**/.env.local)", "Read(//**/.env.*.local)",
+      "Read(//**/.env.production)", "Read(//**/.env.prod)",
+      "Read(//**/*.pem)", "Read(//**/*.p12)", "Read(//**/id_rsa*)", "Read(//**/id_ed25519*)",
+      "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.config/gcloud/**)", "Read(~/.kube/**)",
+      "Read(~/.docker/config.json)", "Read(~/.netrc)", "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.local/share/atuin/key)", "Read(~/.claude.json)"
+    ] | unique) |
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
         UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
