@@ -49,6 +49,9 @@ configure_claude_settings() {
   tmp="$(mktemp)"
   if jq --arg s "$scripts" '
     def cmd(c): {type: "command", command: ($s + "/" + c)};
+    # compact long sessions at 400K instead of ~967K on 1M-context models:
+    # every turn resends the whole context; keep a value set by hand
+    .autoCompactWindow //= 400000 |
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
         UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],

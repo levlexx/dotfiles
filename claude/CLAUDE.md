@@ -19,3 +19,9 @@ tools and config there, not in place.
 
 ## Stack
 Go, Angular/Nx (TypeScript), Kubernetes (k3d locally), Cloud Run.
+
+## Compact instructions
+When compacting, keep: the user's goal and constraints for this session,
+decisions made and why, files changed (paths), commands that verified the
+work and their results, open problems and the next step. Drop: full file
+contents, long command output, superseded attempts.
