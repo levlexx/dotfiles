@@ -77,6 +77,14 @@
       "src": "https://github.com/fredrikaverpil/neotest-golang",
       "version": "'v2.9.0'"
     },
+    "neotest-jest": {
+      "rev": "0e7979d51301dfae5ef839d771bd28cf593fde3f",
+      "src": "https://github.com/nvim-neotest/neotest-jest"
+    },
+    "neotest-vitest": {
+      "rev": "b0c265743c877058068dbc40d104ea5d40e6b257",
+      "src": "https://github.com/marilari88/neotest-vitest"
+    },
     "nvim-dap": {
       "rev": "531771530d4f82ad2d21e436e3cc052d68d7aebb",
       "src": "https://github.com/mfussenegger/nvim-dap"

@@ -22,6 +22,8 @@ brew "glow"
 brew "git-delta"
 brew "hyperfine"
 brew "jq"
+# kubectx + kubens, fzf pickers when run without args
+brew "kubectx"
 # interactive jq
 brew "jnv"
 # psql client for vim-dadbod; keg-only, so force-link to expose it on PATH

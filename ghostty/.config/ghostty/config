@@ -1,4 +1,7 @@
 
+# always dark. To follow macOS light/dark instead, use
+#   theme = light:TokyoNight Day,dark:Tokyo Night
+# plus `set -g @follow_macos on` (tmux) and vim.g.follow_macos = true (nvim)
 theme = Tokyo Night
 font-family = JetBrainsMono Nerd Font
 font-feature = -calt

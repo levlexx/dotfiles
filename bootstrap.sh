@@ -52,10 +52,34 @@ configure_claude_settings() {
     # compact long sessions at 400K instead of ~967K on 1M-context models:
     # every turn resends the whole context; keep a value set by hand
     .autoCompactWindow //= 400000 |
+    # keep secrets out of the model context: Claude file tools and the
+    # cat/head/sed it runs cannot read these (kubectl and co. still can)
+    .permissions.deny = ((.permissions.deny // []) + [
+      "Read(//**/.env)", "Read(//**/.env.local)", "Read(//**/.env.*.local)",
+      "Read(//**/.env.production)", "Read(//**/.env.prod)",
+      "Read(//**/*.pem)", "Read(//**/*.p12)", "Read(//**/id_rsa*)", "Read(//**/id_ed25519*)",
+      "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.config/gcloud/**)", "Read(~/.kube/**)",
+      "Read(~/.docker/config.json)", "Read(~/.netrc)", "Read(~/.config/gh/hosts.yml)",
+      "Read(~/.local/share/atuin/key)", "Read(~/.claude.json)",
+      "Read(~/Library/Application Support/doctl/**)", "Read(~/.config/doctl/**)"
+    ] | unique) |
+    # read-only gcloud/doctl runs without a prompt; deploy/delete/update still ask
+    .permissions.allow = ((.permissions.allow // []) + [
+      "Bash(gcloud * list)", "Bash(gcloud * list *)",
+      "Bash(gcloud * describe *)", "Bash(gcloud logging read *)",
+      "Bash(gcloud config list)", "Bash(gcloud config get *)",
+      "Bash(gcloud config configurations list)", "Bash(gcloud auth list)",
+      "Bash(doctl * list)", "Bash(doctl * list *)", "Bash(doctl * get *)",
+      "Bash(doctl auth list)", "Bash(doctl apps logs *)"
+    ] | unique) |
     .statusLine = {type: "command", command: ($s + "/statusline.sh"), padding: 0}
     | .hooks = (.hooks // {}) + {
         UserPromptSubmit: [{hooks: [cmd("state.sh working")]}],
-        PostToolUse: [{hooks: [cmd("state.sh working")]}],
+        PostToolUse: [
+          {hooks: [cmd("state.sh working")]},
+          # format what Claude edited with the project formatter
+          {matcher: "Edit|Write|MultiEdit", hooks: [{type: "command", command: ($ENV.HOME + "/.claude/hooks/format.sh"), timeout: 30}]}
+        ],
         Notification: [{
           matcher: "permission_prompt|elicitation_dialog|agent_needs_input",
           hooks: [cmd("state.sh waiting"), cmd("notify.sh waiting")]
@@ -169,6 +193,17 @@ install_gh_extensions() {
   gh extension list | grep -q 'dlvhdr/gh-dash' || gh extension install dlvhdr/gh-dash
 }
 
+# beta + log-streaming: `gcloud beta run services logs tail` (crtail)
+install_gcloud_components() {
+  if ! command -v gcloud >/dev/null 2>&1; then
+    print -u2 "skip gcloud components: gcloud is not installed"
+    return
+  fi
+  gcloud components install beta log-streaming --quiet >/dev/null 2>&1 \
+    && print "gcloud components -> beta log-streaming" \
+    || print -u2 "skip gcloud components: install failed"
+}
+
 install_tmux_plugins() {
   if [[ "${SKIP_TMUX_PLUGINS:-0}" == "1" ]]; then
     print "skip tmux plugins"
@@ -214,6 +249,7 @@ link "$dotfiles_dir/atuin/.config/atuin/config.toml" "$HOME/.config/atuin/config
 link "$dotfiles_dir/atuin/.config/atuin/themes" "$HOME/.config/atuin/themes"
 link "$dotfiles_dir/yazi/.config/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
 link "$dotfiles_dir/k9s/.config/k9s/config.yaml" "$HOME/.config/k9s/config.yaml"
+link "$dotfiles_dir/k9s/.config/k9s/plugins.yaml" "$HOME/.config/k9s/plugins.yaml"
 link "$dotfiles_dir/k9s/.config/k9s/skins/tokyonight.yaml" "$HOME/.config/k9s/skins/tokyonight.yaml"
 link "$dotfiles_dir/lazydocker/.config/lazydocker/config.yml" "$HOME/.config/lazydocker/config.yml"
 link "$dotfiles_dir/btop/.config/btop/btop.conf" "$HOME/.config/btop/btop.conf"
@@ -224,9 +260,12 @@ link "$dotfiles_dir/tmux/claude-usage" "$HOME/.tmux/claude-usage"
 link "$dotfiles_dir/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 link "$dotfiles_dir/claude/commands" "$HOME/.claude/commands"
 link "$dotfiles_dir/claude/agents" "$HOME/.claude/agents"
+link "$dotfiles_dir/claude/hooks" "$HOME/.claude/hooks"
 link "$dotfiles_dir/claude/bin/ccp" "$HOME/.local/bin/ccp"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
+link "$dotfiles_dir/direnv/.config/direnv/direnv.toml" "$HOME/.config/direnv/direnv.toml"
+link "$dotfiles_dir/navi/cheats" "$HOME/.local/share/navi/cheats/dotfiles"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/shaders" "$HOME/.config/ghostty/shaders"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
@@ -237,4 +276,5 @@ install_claude_plugins
 build_bat_cache
 install_gh_extensions
 configure_notifier_icon
+install_gcloud_components
 install_tmux_plugins

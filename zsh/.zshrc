@@ -98,6 +98,7 @@ _cache_comp() {
 # docker/task emit fpath-style completion files
 command -v docker >/dev/null 2>&1 && _cache_comp _docker docker completion zsh
 command -v task >/dev/null 2>&1 && _cache_comp _task task --completion zsh
+command -v doctl >/dev/null 2>&1 && _cache_comp _doctl doctl completion zsh
 
 fpath=(
   "$_zsh_comp_cache"
@@ -199,6 +200,11 @@ alias c='clear'
 
 alias lg='lazygit'
 alias ld='lazydocker'
+# k8s: context / namespace pickers (fzf), k9s
+alias kctx='kubectx'
+alias kns='kubens'
+alias k='kubectl'
+alias k9='k9s'
 # claude in an isolated worktree: cw <name>, cw '#123' for a PR
 alias cw='claude --worktree'
 # drop the .worktreeinclude template into the current repo (copies .env etc.
@@ -212,6 +218,11 @@ wtinclude() {
   fi
   cp ~/dotfiles/claude/worktreeinclude "$root/.worktreeinclude" && print "created $root/.worktreeinclude"
 }
+# gcloud: gcinit, gcfg, crlogs, crtail, crurl, crrev (see the file header)
+[[ -f "$HOME/dotfiles/zsh/gcloud.zsh" ]] && source "$HOME/dotfiles/zsh/gcloud.zsh"
+# DigitalOcean: doinit, doctx, dossh, dologs, dodeploy, dok8s
+[[ -f "$HOME/dotfiles/zsh/doctl.zsh" ]] && source "$HOME/dotfiles/zsh/doctl.zsh"
+
 # --------------------------------
 # Git core
 # --------------------------------

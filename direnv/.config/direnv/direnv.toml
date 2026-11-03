@@ -1,0 +1,13 @@
+[global]
+# no "direnv: export +FOO -BAR ..." wall on every cd
+hide_env_diff = true
+# keep only errors and the "blocked" notice: drop "direnv: loading/unloading"
+log_filter = "^(error|.*blocked)"
+# slow .envrc (big dotenv, nix) warns after 10s instead of 5s
+warn_timeout = "10s"
+
+# Trust every repo under these roots (no `direnv allow` prompt). Off by
+# default: a repo cloned here would run its .envrc on cd. Uncomment to opt in;
+# roots that don't exist on a Mac are ignored.
+# [whitelist]
+# prefix = ["~/Projects", "~/work"]

@@ -26,11 +26,15 @@ jobs:
             tmux/claude-usage/claude-usage.tmux \
             tmux/scripts/*.sh \
             claude/bin/ccp \
+            claude/hooks/format.sh \
+            scripts/doctor.sh \
             git/.config/git/hooks/*
 
       - name: zsh syntax
         run: |
           zsh -n zsh/.zshrc
+          zsh -n zsh/gcloud.zsh
+          zsh -n zsh/doctl.zsh
           zsh -n bootstrap.sh
 
       - name: typos

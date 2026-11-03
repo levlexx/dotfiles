@@ -1,0 +1,165 @@
+% gcloud, cloud run
+
+# Deploy a service from source (Cloud Build + buildpacks/Dockerfile)
+gcloud run deploy <service> --source . --region <region>
+
+# Deploy an existing image
+gcloud run deploy <service> --image <image> --region <region>
+
+# Deploy without traffic (tagged URL to test first)
+gcloud run deploy <service> --image <image> --no-traffic --tag <tag>
+
+# Send all traffic to the latest revision
+gcloud run services update-traffic <service> --to-latest
+
+# Canary: split traffic between revisions
+gcloud run services update-traffic <service> --to-revisions=<revision>=<percent>
+
+# Roll back: 100% traffic to a revision
+gcloud run services update-traffic <service> --to-revisions=<revision>=100
+
+# Revisions of a service (newest first)
+gcloud run revisions list --service <service> --sort-by='~metadata.creationTimestamp'
+
+# Service URL
+gcloud run services describe <service> --format='value(status.url)'
+
+# Current traffic split
+gcloud run services describe <service> --format='yaml(status.traffic)'
+
+# Env vars of a service
+gcloud run services describe <service> --format='yaml(spec.template.spec.containers[0].env)'
+
+# Set / update env vars
+gcloud run services update <service> --update-env-vars <KEY>=<value>
+
+# Mount a Secret Manager secret as an env var
+gcloud run services update <service> --update-secrets <ENV_NAME>=<secret>:latest
+
+# Scale: min/max instances
+gcloud run services update <service> --min-instances <min> --max-instances <max>
+
+# Call a private service with your identity token
+curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" "$(gcloud run services describe <service> --format='value(status.url)')"
+
+# Proxy a private service to localhost:8080
+gcloud run services proxy <service> --port 8080
+
+# Recent error logs of a service
+gcloud logging read 'resource.type=cloud_run_revision AND resource.labels.service_name=<service> AND severity>=ERROR' --freshness 1d --limit 50
+
+# Live logs (needs beta + log-streaming)
+gcloud beta run services logs tail <service>
+
+# Run a Cloud Run job now
+gcloud run jobs execute <job> --wait
+
+$ service: gcloud run services list --format='value(metadata.name)'
+$ job: gcloud run jobs list --format='value(metadata.name)'
+$ revision: gcloud run revisions list --service <service> --format='value(metadata.name)' --sort-by='~metadata.creationTimestamp'
+$ region: printf '%s\n' europe-west1 europe-west3 europe-west4 europe-central2 us-central1 us-east1
+$ image: gcloud artifacts docker images list "$(gcloud config get artifacts/location)-docker.pkg.dev/$(gcloud config get project)/<repository>" --include-tags --format='value(package,tags)' | awk '{split($2,t,","); print $1":"t[1]}'
+$ repository: gcloud artifacts repositories list --format='value(name.basename())'
+
+
+% gcloud, config
+
+# Bind this repo to a gcloud configuration (project/region, .envrc)
+gcinit
+
+# Switch the global configuration
+gcfg
+
+# Create a configuration
+gcloud config configurations create <name> --no-activate
+
+# Login (CLI) and application default credentials (local Go/TS SDKs)
+gcloud auth login && gcloud auth application-default login
+
+# Active account, project, region
+gcloud config list
+
+# Set project for the current configuration
+gcloud config set project <project>
+
+$ project: gcloud projects list --format='value(projectId)'
+
+
+% gcloud, artifact registry
+
+# Configure docker auth for a region
+gcloud auth configure-docker <region>-docker.pkg.dev
+
+# List images in a repository
+gcloud artifacts docker images list <region>-docker.pkg.dev/$(gcloud config get project)/<repository> --include-tags
+
+# Build and push with Cloud Build
+gcloud builds submit --tag <region>-docker.pkg.dev/$(gcloud config get project)/<repository>/<name>:<tag>
+
+$ region: printf '%s\n' europe-west1 europe-west3 europe-west4 europe-central2 us-central1 us-east1
+$ repository: gcloud artifacts repositories list --format='value(name.basename())'
+
+
+% gcloud, secrets
+
+# List secrets
+gcloud secrets list
+
+# Create a secret from stdin
+printf '%s' '<value>' | gcloud secrets create <name> --data-file=-
+
+# Add a new version
+printf '%s' '<value>' | gcloud secrets versions add <secret> --data-file=-
+
+# Read the latest version
+gcloud secrets versions access latest --secret <secret>
+
+# Let a service account read a secret
+gcloud secrets add-iam-policy-binding <secret> --member serviceAccount:<sa> --role roles/secretmanager.secretAccessor
+
+$ secret: gcloud secrets list --format='value(name)'
+$ sa: gcloud iam service-accounts list --format='value(email)'
+
+
+% gcloud, cloud sql
+
+# Local proxy to an instance on 127.0.0.1:<port> (cloud-sql-proxy from mise)
+cloud-sql-proxy --port <port> <connection>
+
+# Connect with psql through the proxy
+psql "host=127.0.0.1 port=<port> user=<user> dbname=<db>"
+
+# List instances
+gcloud sql instances list
+
+$ connection: gcloud sql instances list --format='value(connectionName)'
+$ port: echo 5432
+
+
+% gcloud, iam
+
+# Who has which role on the project
+gcloud projects get-iam-policy $(gcloud config get project) --flatten='bindings[].members' --format='table(bindings.role,bindings.members)'
+
+# Grant a role
+gcloud projects add-iam-policy-binding $(gcloud config get project) --member <member> --role <role>
+
+# Service accounts
+gcloud iam service-accounts list
+
+# Act as a service account for one command
+gcloud <command> --impersonate-service-account <sa>
+
+$ sa: gcloud iam service-accounts list --format='value(email)'
+
+
+% gcloud, pubsub
+
+# Publish a message
+gcloud pubsub topics publish <topic> --message '<message>'
+
+# Pull messages (ack)
+gcloud pubsub subscriptions pull <subscription> --auto-ack --limit 10
+
+$ topic: gcloud pubsub topics list --format='value(name.basename())'
+$ subscription: gcloud pubsub subscriptions list --format='value(name.basename())'
