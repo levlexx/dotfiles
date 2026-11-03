@@ -167,8 +167,18 @@ if command -v fzf >/dev/null 2>&1; then
 fi
 unfunction __fzf_restore_options
 
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:300 {}'"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --icons=always --color=always {}'"
+
 if [[ -f "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.plugin.zsh" ]]; then
   source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/fzf-tab/fzf-tab.plugin.zsh"
+  # fzf-tab draws its own menu; reuse the Tokyo Night FZF_DEFAULT_OPTS
+  zstyle ':completion:*' menu no
+  zstyle ':fzf-tab:*' use-fzf-default-opts yes
+  zstyle ':fzf-tab:complete:(cd|z|eza|ls):*' fzf-preview 'eza -1 --icons=always --color=always $realpath'
 fi
 
 # --------------------------------
