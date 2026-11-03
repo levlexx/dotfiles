@@ -12,7 +12,11 @@ window-padding-y = 10
 
 background-opacity = 0.96
 
-background-blur-radius = 0
+background-blur = 20
+
+# nvim paints an explicit bg on every cell; without this it stays opaque
+# while the shell is translucent
+background-opacity-cells = true
 
 cursor-style = block
 
