@@ -200,6 +200,7 @@ link "$dotfiles_dir/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
+link "$dotfiles_dir/ghostty/.config/ghostty/shaders" "$HOME/.config/ghostty/shaders"
 link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/ghostty/themes/Tokyo Night"
 
 configure_claude_settings

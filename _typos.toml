@@ -1,6 +1,6 @@
 [files]
-# binary icons trip the spell-checker
-extend-exclude = ["tmux/claude-usage/assets/"]
+# binary icons and vendored shaders trip the spell-checker
+extend-exclude = ["tmux/claude-usage/assets/", "ghostty/.config/ghostty/shaders/"]
 
 [default.extend-words]
 # vim vocabulary: <leader>ba (alternate buffer), :enew
