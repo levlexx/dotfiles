@@ -16,8 +16,14 @@ brew "fd"
 brew "fzf"
 brew "fzf-tab"
 brew "gh"
+# secret scan in the global pre-commit hook
+brew "gitleaks"
+brew "glow"
 brew "git-delta"
+brew "hyperfine"
 brew "jq"
+# interactive jq
+brew "jnv"
 # psql client for vim-dadbod; keg-only, so force-link to expose it on PATH
 brew "libpq", link: true
 brew "mise"
@@ -31,6 +37,7 @@ brew "starship"
 brew "stern"
 # clickable macOS notifications for the claude-usage tmux plugin
 brew "terminal-notifier"
+brew "tokei"
 brew "tmux"
 # copy hashes/paths/URLs off the screen with hints (prefix F)
 brew "tmux-fingers"

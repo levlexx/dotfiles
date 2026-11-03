@@ -118,6 +118,16 @@ build_bat_cache() {
   bat cache --build >/dev/null && print "bat cache -> tokyonight_night"
 }
 
+install_gh_extensions() {
+  if ! command -v gh >/dev/null 2>&1 || ! gh auth status >/dev/null 2>&1; then
+    print -u2 "skip gh extensions: gh missing or not logged in (gh auth login)"
+    return
+  fi
+
+  # PR / issue dashboard: gh dash
+  gh extension list | grep -q 'dlvhdr/gh-dash' || gh extension install dlvhdr/gh-dash
+}
+
 install_tmux_plugins() {
   if [[ "${SKIP_TMUX_PLUGINS:-0}" == "1" ]]; then
     print "skip tmux plugins"
@@ -174,5 +184,6 @@ link "$dotfiles_dir/ghostty/.config/ghostty/themes/Tokyo Night" "$HOME/.config/g
 configure_claude_settings
 install_brew_packages
 build_bat_cache
+install_gh_extensions
 configure_notifier_icon
 install_tmux_plugins

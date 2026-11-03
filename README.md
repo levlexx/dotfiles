@@ -35,6 +35,13 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `ld` | lazydocker |
 | `cw <name>` | Claude in an isolated git worktree |
 | `btop` | system resource monitor |
+| `gh dash` | PR / issue dashboard |
+| `git dft` / `git dlog` | syntax-aware diff / log (difftastic) |
+| `git difftool -d` | whole-tree diff in nvim |
+| `sg` / `ast-grep` | structural code search and rewrite |
+| `jnv file.json` | interactive jq |
+| `glow` | render markdown |
+| `hyperfine`, `tokei` | benchmark commands, count code |
 | `v` | nvim |
 | `y` | yazi file manager |
 | `g`, `gst`, `gd`, `gpl`, `gpu`, … | git aliases (see `.zshrc`) |

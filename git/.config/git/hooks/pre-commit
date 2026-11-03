@@ -1,6 +1,7 @@
 #!/bin/sh
-# Global pre-commit: spell-check staged files with typos, then chain to the
-# repo's own hook. Skip everything with --no-verify.
+# Global pre-commit: spell-check staged files with typos, scan them for
+# secrets with gitleaks, then chain to the repo's own hook. Skip everything
+# with --no-verify.
 set -u
 
 if command -v typos >/dev/null 2>&1; then
@@ -8,6 +9,15 @@ if command -v typos >/dev/null 2>&1; then
   # effective even though paths are passed explicitly.
   if ! git diff --cached --name-only --diff-filter=ACMR -z | xargs -0 typos --force-exclude --; then
     echo >&2 "typos: spelling errors in staged files (fix or commit with --no-verify)"
+    exit 1
+  fi
+fi
+
+# Secrets in the staged diff (tokens, keys, .env values). A repo can tune
+# rules or allowlist findings with its own .gitleaks.toml / .gitleaksignore.
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! gitleaks git --pre-commit --staged --redact --no-banner --log-level warn; then
+    echo >&2 "gitleaks: possible secret in staged changes (fix, allowlist, or commit with --no-verify)"
     exit 1
   fi
 fi
