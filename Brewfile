@@ -3,9 +3,12 @@ tap "pyroscope-io/brew"
 cask "ghostty"
 cask "gcloud-cli"
 
+brew "ast-grep"
 brew "atuin"
 brew "bat"
 brew "btop"
+# syntax-aware diffs: git dft / git dlog
+brew "difftastic"
 brew "direnv"
 brew "dive"
 brew "eza"

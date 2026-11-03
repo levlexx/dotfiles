@@ -32,6 +32,10 @@
 	hooksPath = ~/.config/git/hooks
 [interactive]
 	diffFilter = delta --color-only
+[alias]
+	# difftastic: syntax-aware diff / log -p
+	dft = -c diff.external=difft diff
+	dlog = -c diff.external=difft log -p --ext-diff
 [delta]
 	navigate = true
 	syntax-theme = tokyonight_night
