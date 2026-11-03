@@ -199,6 +199,8 @@ alias c='clear'
 
 alias lg='lazygit'
 alias ld='lazydocker'
+# claude in an isolated worktree: cw <name>, cw '#123' for a PR
+alias cw='claude --worktree'
 # --------------------------------
 # Git core
 # --------------------------------

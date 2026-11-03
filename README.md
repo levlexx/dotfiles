@@ -33,6 +33,7 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `ll` / `lt` | eza list / tree |
 | `lg` | lazygit |
 | `ld` | lazydocker |
+| `cw <name>` | Claude in an isolated git worktree |
 | `btop` | system resource monitor |
 | `v` | nvim |
 | `y` | yazi file manager |
@@ -58,6 +59,7 @@ New terminals attach to the `main` tmux session automatically.
 | `prefix g` | lazygit popup |
 | `prefix t` | scratch shell popup (same key hides it) |
 | `prefix A` | Claude in a split on the right |
+| `prefix W` | Claude in a new git worktree, own window |
 | `prefix F` | fingers: copy hashes / paths / URLs by hint |
 | `prefix a` / `S` | last window / last session |
 

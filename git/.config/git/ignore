@@ -1,4 +1,6 @@
 **/.claude/settings.local.json
+# claude --worktree checkouts
+**/.claude/worktrees/
 node_modules/
 .git/
 .DS_Store
