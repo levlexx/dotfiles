@@ -20,3 +20,8 @@ vim.pack.add({
   confirm = false,
   load = true,
 })
+
+-- bundled with nvim 0.12 but opt-in: :Undotree, and :DiffTool / `nvim -d`
+-- on two directories (git difftool -d)
+vim.cmd.packadd("nvim.undotree")
+vim.cmd.packadd("nvim.difftool")

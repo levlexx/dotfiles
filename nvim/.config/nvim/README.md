@@ -190,6 +190,8 @@ also get vale style linting via `vale-ls`.
 | `<leader>uD` | Dashboard |
 | `<leader>uh` | Toggle inlay hints |
 | `<leader>uw` | Toggle wrap |
+| `<leader>uu` | Undo tree (built-in `:Undotree`) |
+| `S` | Flash jump (labels); `r` / `R` remote / treesitter in operator mode |
 | `<leader>ul` | Toggle line numbers |
 | `<leader>uL` | Toggle relative numbers |
 | `<leader>ao` | OpenCode |

@@ -10,7 +10,13 @@
 	prune = true
 [diff]
 	algorithm = histogram
+	# git difftool -d: whole-tree diff in nvim's built-in difftool
+	tool = nvim_difftool
 	colorMoved = default
+[difftool "nvim_difftool"]
+	cmd = nvim -d \"$LOCAL\" \"$REMOTE\"
+[difftool]
+	prompt = false
 [merge]
 	conflictstyle = zdiff3
 [rerere]
