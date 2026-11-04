@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+#
+# diag: diagrams for an app, kept in the repo next to the code.
+#
+#   diag new <name> [template]   docs/diagrams/<name>.d2 (or .py) from a template:
+#                                service (default), sequence, c4, deploy,
+#                                gcp, do (cloud icons, python `diagrams`)
+#   diag watch <file.d2>         live preview in the browser, reloads on save
+#   diag render [files...]       .d2 -> SVG, .py -> PNG (default: all in docs/diagrams)
+#   diag deps [packages]         Go package dependency graph (goda), default ./...
+#   diag calls <main-pkg> [focus-pkg]
+#                                Go call graph (go-callvis), std library hidden
+#   diag db <dsn>                ER diagrams + table docs from a live database
+#                                into docs/db (tbls); e.g. postgres://u:p@127.0.0.1:5432/app?sslmode=disable
+#
+# SVGs carry a light and a dark theme (GitHub picks one), ELK layout.
+# Defaults come from D2_* env (D2_THEME, D2_DARK_THEME, D2_LAYOUT, D2_SKETCH=1).
+
+set -euo pipefail
+
+die() {
+	printf 'diag: %s\n' "$*" >&2
+	exit 1
+}
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+out="$root/docs/diagrams"
+templates="${DOTFILES_DIR:-$HOME/dotfiles}/diagrams/templates"
+
+export D2_LAYOUT="${D2_LAYOUT:-elk}" D2_THEME="${D2_THEME:-0}" \
+	D2_DARK_THEME="${D2_DARK_THEME:-200}" D2_PAD="${D2_PAD:-40}"
+
+render_py() { # file.py: python `diagrams` writes next to the script
+	(cd "$(dirname "$1")" && uvx --quiet --from diagrams python -I "$(basename "$1")")
+}
+
+render_one() {
+	case "$1" in
+	*.d2) d2 "$1" "${1%.d2}.svg" ;;
+	*.py) render_py "$1" ;;
+	*) die "don't know how to render $1" ;;
+	esac
+}
+
+cmd_new() {
+	local name="${1:-}" template="${2:-service}" ext=d2
+	[ -n "$name" ] || die "usage: diag new <name> [service|sequence|c4|deploy|gcp|do]"
+	case "$template" in gcp | do) ext=py ;; esac
+	local src="$templates/$template.$ext" dst="$out/$name.$ext"
+	[ -f "$src" ] || die "no template $template ($(ls "$templates" | sed 's/\..*//' | tr '\n' ' '))"
+	[ -e "$dst" ] && die "$dst already exists"
+	mkdir -p "$out"
+	if [ "$ext" = py ]; then
+		sed "s/__NAME__/$name/g" "$src" >"$dst"
+	else
+		cp "$src" "$dst"
+	fi
+	printf '%s\n' "$dst"
+	[ "$ext" = d2 ] && printf 'next: diag watch %s   (nvim: <leader>Dw)\n' "${dst#"$root"/}"
+	return 0
+}
+
+cmd_render() {
+	local files=("$@") f
+	if [ ${#files[@]} -eq 0 ]; then
+		shopt -s nullglob
+		files=("$out"/*.d2 "$out"/*.py)
+		[ ${#files[@]} -gt 0 ] || die "nothing in ${out#"$root"/} (diag new <name>)"
+	fi
+	for f in "${files[@]}"; do
+		render_one "$f"
+	done
+}
+
+cmd_deps() {
+	command -v goda >/dev/null || die "goda missing (mise run install-go-tools)"
+	[ -f "$root/go.mod" ] || die "no go.mod in $root"
+	mkdir -p "$out"
+	local file="$out/go-deps.svg"
+	(cd "$root" && goda graph -cluster -short "${1:-./...}" | dot -Tsvg -o "$file")
+	printf '%s\n' "$file"
+}
+
+cmd_calls() {
+	command -v go-callvis >/dev/null || die "go-callvis missing (mise run install-go-tools)"
+	[ -n "${1:-}" ] || die "usage: diag calls <main-pkg> [focus-pkg]"
+	mkdir -p "$out"
+	local file="$out/calls"
+	(cd "$root" && go-callvis -nostd -group pkg,type -format svg -file "$file" \
+		${2:+-focus "$2"} "$1" 2>/dev/null)
+	rm -f "$file.gv"
+	printf '%s.svg\n' "$file"
+}
+
+cmd_db() {
+	command -v tbls >/dev/null || die "tbls missing (mise install)"
+	[ -n "${1:-}" ] || die "usage: diag db <dsn>"
+	tbls doc --force --er-format svg "$1" "$root/docs/db"
+	printf '%s/docs/db/README.md\n' "$root"
+}
+
+case "${1:-}" in
+"" | -h | --help) sed -n '3,20p' "$0" | sed 's/^# \{0,1\}//' ;;
+new) shift; cmd_new "$@" ;;
+watch)
+	[ -n "${2:-}" ] || die "usage: diag watch <file.d2>"
+	exec d2 --watch "$2" "${2%.d2}.svg"
+	;;
+render) shift; cmd_render "$@" ;;
+deps) shift; cmd_deps "$@" ;;
+calls) shift; cmd_calls "$@" ;;
+db) shift; cmd_db "$@" ;;
+*) die "unknown command $1 (diag -h)" ;;
+esac

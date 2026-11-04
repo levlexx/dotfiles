@@ -27,6 +27,8 @@ jobs:
             tmux/scripts/*.sh \
             claude/bin/ccp \
             golang/bin/* \
+            diagrams/bin/diag \
+            direnv/.config/direnv/lib/*.sh \
             claude/hooks/format.sh \
             scripts/doctor.sh \
             git/.config/git/hooks/*
@@ -36,6 +38,7 @@ jobs:
           zsh -n zsh/.zshrc
           zsh -n zsh/gcloud.zsh
           zsh -n zsh/doctl.zsh
+          zsh -n zsh/sops.zsh
           zsh -n bootstrap.sh
 
       - name: typos

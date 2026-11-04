@@ -1,0 +1,31 @@
+{
+  "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+  "go_slog_json": {
+    "title": "Go slog JSON",
+    "description": "log/slog JSONHandler lines: time, level, msg, plus attributes (shown below each line).",
+    "url": "https://pkg.go.dev/log/slog#JSONHandler",
+    "json": true,
+    "timestamp-field": "time",
+    "level-field": "level",
+    "body-field": "msg",
+    "level": {
+      "fatal": "^(FATAL|ERROR\\+\\d+)",
+      "error": "^ERROR",
+      "warning": "^WARN",
+      "info": "^INFO",
+      "debug": "^DEBUG"
+    },
+    "line-format": [
+      { "field": "__timestamp__", "timestamp-format": "%H:%M:%S.%L" },
+      " ",
+      { "field": "level", "min-width": 5, "max-width": 5, "overflow": "truncate" },
+      " ",
+      { "field": "msg" }
+    ],
+    "value": {
+      "level": { "kind": "string", "identifier": true },
+      "msg": { "kind": "string" },
+      "source": { "kind": "json", "hidden": true }
+    }
+  }
+}

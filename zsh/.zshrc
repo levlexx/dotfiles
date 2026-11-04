@@ -9,6 +9,8 @@ export LESS="-FRX"
 export CLICOLOR=1
 # eza looks in ~/Library/Application Support on macOS otherwise
 export EZA_CONFIG_DIR="$XDG_CONFIG_HOME/eza"
+# d2 (diag, nvim preview): ELK layout, light + dark theme in every SVG
+export D2_LAYOUT=elk D2_THEME=0 D2_DARK_THEME=200
 
 # Tokyo Night (tokyonight.nvim extras/fzf/tokyonight_night.sh)
 export FZF_DEFAULT_OPTS="--highlight-line --info=inline-right --ansi --layout=reverse --border=none \
@@ -222,6 +224,18 @@ wtinclude() {
 [[ -f "$HOME/dotfiles/zsh/gcloud.zsh" ]] && source "$HOME/dotfiles/zsh/gcloud.zsh"
 # DigitalOcean: doinit, doctx, dossh, dologs, dodeploy, dok8s
 [[ -f "$HOME/dotfiles/zsh/doctl.zsh" ]] && source "$HOME/dotfiles/zsh/doctl.zsh"
+# sops + age: sopsinit, senv, agepub
+[[ -f "$HOME/dotfiles/zsh/sops.zsh" ]] && source "$HOME/dotfiles/zsh/sops.zsh"
+
+# go test via gotestsum: readable names, watch mode, slowest tests
+alias gt='gotestsum --format testname --'
+alias gtw='gotestsum --watch --format testname'
+gtslow() {
+  local json="${TMPDIR:-/tmp}/gotestsum-$$.json"
+  gotestsum --format dots --jsonfile "$json" -- "${@:-./...}"
+  gotestsum tool slowest --jsonfile "$json" --threshold "${GTSLOW:-100ms}"
+  rm -f "$json"
+}
 
 # --------------------------------
 # Git core
@@ -268,6 +282,10 @@ alias gplom='git pull origin $(git branch --show-current)'
 alias gfix='git commit --fixup'
 alias gsquash='git rebase -i --autosquash'
 alias gconflict='git diff --name-only --diff-filter=U'
+# stage fixes, then fold each into the commit it belongs to
+alias gab='git absorb --and-rebase'
+# delete local branches of merged PRs
+alias gpoi='gh poi'
 
 alias v='nvim'
 alias vi='nvim'

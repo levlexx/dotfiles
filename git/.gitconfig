@@ -29,6 +29,10 @@
 	autostash = true
 	autosquash = true
 	updateRefs = true
+[absorb]
+	# one fixup per target commit; look further back than the default 10
+	oneFixupPerCommit = true
+	maxStack = 50
 [commit]
 	verbose = true
 [help]

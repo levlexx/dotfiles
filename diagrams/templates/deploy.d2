@@ -1,0 +1,40 @@
+# Deployment: where things run and how code gets there. Plain shapes; for
+# official cloud icons use `diag new <name> gcp` or `do`.
+direction: right
+
+dev: Developer {shape: person}
+gh: GitHub {
+  repo: repo
+  ci: Actions
+  repo -> ci: push / PR
+}
+
+gcp: Google Cloud {
+  style.fill: "#e8f0fe"
+  ar: Artifact Registry
+  run: Cloud Run {
+    api: api
+    worker: worker
+  }
+  sql: Cloud SQL {shape: cylinder}
+  secrets: Secret Manager
+  ps: Pub/Sub {shape: queue}
+
+  ar -> run: image
+  run.api -> sql
+  run.api -> ps
+  ps -> run.worker: push
+  secrets -> run: env
+}
+
+do: DigitalOcean {
+  style.fill: "#e5f4ff"
+  droplet: Droplet
+  spaces: Spaces {shape: stored_data}
+  droplet -> spaces
+}
+
+dev -> gh.repo
+gh.ci -> gcp.ar: docker push
+gh.ci -> gcp.run: gcloud run deploy
+gh.ci -> do.droplet: ssh deploy
