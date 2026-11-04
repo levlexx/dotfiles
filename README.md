@@ -50,6 +50,14 @@ Machine-specific git identity goes in `~/.gitconfig.local`.
 | `dlvk init` / `dlvk deploy/x` | debug image with delve / port-forward it, then nvim attach |
 | `oha -c 50 -z 30s <url>` | load test with a live TUI |
 | `Ctrl-G` → `go` | profiling, escape analysis, PGO, GOMEMLIMIT, Cloud Profiler, Pyroscope cheats |
+| `diag new <name> [template]` | diagram from a template: service, sequence, c4, deploy, gcp, do |
+| `diag watch` / `diag render` | live browser preview / render to SVG (PNG for cloud-icon diagrams) |
+| `diag deps` / `diag calls` / `diag db <dsn>` | Go package graph, call graph, ER diagrams + table docs |
+| `/diagram [overview\|request <route>\|deploy\|c4]` | Claude draws the diagram from the code |
+| `lnav <file>` / `cmd \| lnav` | log viewer; Go slog JSON and Cloud Logging JSON formats built in |
+| `gt` / `gtw` / `gtslow` | go test via gotestsum / watch mode / slowest tests |
+| `sopsinit` / `senv` / `agepub` | encrypted `.env.sops` in the repo, loaded by direnv / edit it / this Mac's age key |
+| `gab` / `gpoi` | git absorb (fold staged fixes into the right commits) / delete merged branches |
 | `mise run doctor` | check this machine against the repo |
 | `cw <name>` | Claude in an isolated git worktree |
 | `wtinclude` | add `.worktreeinclude` (copy `.env` etc. into agent worktrees) |
@@ -83,6 +91,21 @@ to `.prof/`, benchmark runs to `.bench/` (both globally gitignored). In nvim
 `<leader>ce` shows escape analysis and inlining as diagnostics, and the
 `go-perf` Claude agent runs the measure, change, re-measure loop. nvim-dap
 also picks up a repo's `.vscode/launch.json`.
+
+**Diagrams** live in `docs/diagrams` next to the code. D2 files render to
+SVG with a light and a dark theme (GitHub picks the right one); `gcp`/`do`
+templates use the official cloud icons via python `diagrams` (runs through
+`uvx`, nothing installed) and render to PNG. nvim: `<leader>mw` live
+preview in the browser, `<leader>ma` ASCII preview, `<leader>mr` render,
+`<leader>mn` new from a template. Mermaid in markdown is highlighted too.
+
+**Secrets with sops + age.** `sopsinit` creates this Mac's age key once
+(`~/.config/sops/age/keys.txt`, back it up), writes `.sops.yaml`, encrypts
+`.env` to `.env.sops` and adds `use sops` to `.envrc`, so direnv decrypts
+it in memory on `cd`. Commit `.sops.yaml` and `.env.sops`. For the second
+Mac either copy the key file or run `agepub` there and pass that key to
+`sopsinit age1...` (then `sops updatekeys .env.sops`). Claude cannot read
+the key or run `sops -d`.
 
 **DigitalOcean per repo** works the same way: `doinit` picks (or creates,
 asking for a token) a doctl context and writes `DIGITALOCEAN_CONTEXT` to
@@ -182,7 +205,8 @@ Leader groups (which-key pops up after `Space`): `f` find · `g` git ·
 | `~/.config/mise/config.toml` | `mise/` |
 | `~/.config/starship.toml`, `~/.config/lazygit` | `starship/`, `lazygit/` |
 | `~/.config/atuin/config.toml` | `atuin/` |
-| `~/.config/direnv/direnv.toml` | `direnv/` |
+| `~/.config/direnv/direnv.toml`, `~/.config/direnv/lib` | `direnv/` |
+| `~/.config/lnav/formats/dotfiles` | `lnav/formats/` |
 | `~/.local/share/navi/cheats/dotfiles` | `navi/cheats/` |
 | `~/.config/btop/btop.conf` | `btop/` |
 | `~/.config/ghostty/*` | `ghostty/` |

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+  "gcp_structured_json": {
+    "title": "Cloud Logging structured JSON",
+    "description": "Cloud Run / GKE style stdout JSON: severity, message, time or timestamp; also `gcloud logging read --format=json | jq -c '.[]'` entries.",
+    "url": "https://cloud.google.com/logging/docs/structured-logging",
+    "json": true,
+    "timestamp-field": "timestamp",
+    "level-field": "severity",
+    "body-field": "message",
+    "level": {
+      "fatal": "^(CRITICAL|ALERT|EMERGENCY)",
+      "error": "^ERROR",
+      "warning": "^WARNING",
+      "notice": "^NOTICE",
+      "info": "^INFO",
+      "debug": "^DEBUG"
+    },
+    "line-format": [
+      {
+        "field": "__timestamp__",
+        "timestamp-format": "%H:%M:%S.%L"
+      },
+      " ",
+      {
+        "field": "severity",
+        "min-width": 7,
+        "max-width": 7,
+        "overflow": "truncate",
+        "default-value": "DEFAULT"
+      },
+      " ",
+      {
+        "field": "message",
+        "default-value": ""
+      },
+      {
+        "field": "textPayload",
+        "default-value": ""
+      },
+      {
+        "field": "jsonPayload/message",
+        "default-value": ""
+      }
+    ],
+    "value": {
+      "severity": {
+        "kind": "string",
+        "identifier": true
+      },
+      "message": {
+        "kind": "string"
+      },
+      "textPayload": {
+        "kind": "string"
+      },
+      "jsonPayload": {
+        "kind": "json"
+      },
+      "logging.googleapis.com/trace": {
+        "kind": "string",
+        "identifier": true,
+        "hidden": true
+      },
+      "resource": {
+        "kind": "json",
+        "hidden": true
+      },
+      "labels": {
+        "kind": "json",
+        "hidden": true
+      },
+      "insertId": {
+        "kind": "string",
+        "hidden": true
+      },
+      "logName": {
+        "kind": "string",
+        "hidden": true
+      },
+      "receiveTimestamp": {
+        "kind": "string",
+        "hidden": true
+      },
+      "jsonPayload/message": {
+        "kind": "string"
+      }
+    }
+  }
+}

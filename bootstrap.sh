@@ -61,7 +61,9 @@ configure_claude_settings() {
       "Read(~/.ssh/**)", "Read(~/.aws/**)", "Read(~/.config/gcloud/**)", "Read(~/.kube/**)",
       "Read(~/.docker/config.json)", "Read(~/.netrc)", "Read(~/.config/gh/hosts.yml)",
       "Read(~/.local/share/atuin/key)", "Read(~/.claude.json)",
-      "Read(~/Library/Application Support/doctl/**)", "Read(~/.config/doctl/**)"
+      "Read(~/Library/Application Support/doctl/**)", "Read(~/.config/doctl/**)",
+      "Read(~/.config/sops/age/**)", "Bash(sops -d *)", "Bash(sops --decrypt *)",
+      "Bash(sops decrypt *)", "Bash(age-keygen -y *)"
     ] | unique) |
     # read-only gcloud/doctl runs without a prompt; deploy/delete/update still ask
     .permissions.allow = ((.permissions.allow // []) + [
@@ -191,6 +193,8 @@ install_gh_extensions() {
 
   # PR / issue dashboard: gh dash
   gh extension list | grep -q 'dlvhdr/gh-dash' || gh extension install dlvhdr/gh-dash
+  # delete local branches whose PRs are merged: gh poi
+  gh extension list | grep -q 'seachicken/gh-poi' || gh extension install seachicken/gh-poi
 }
 
 # beta + log-streaming: `gcloud beta run services logs tail` (crtail)
@@ -265,9 +269,12 @@ link "$dotfiles_dir/claude/bin/ccp" "$HOME/.local/bin/ccp"
 link "$dotfiles_dir/golang/bin/gprof" "$HOME/.local/bin/gprof"
 link "$dotfiles_dir/golang/bin/gbench" "$HOME/.local/bin/gbench"
 link "$dotfiles_dir/golang/bin/dlvk" "$HOME/.local/bin/dlvk"
+link "$dotfiles_dir/diagrams/bin/diag" "$HOME/.local/bin/diag"
 link "$dotfiles_dir/tmux/scripts" "$HOME/.tmux/scripts"
 link "$dotfiles_dir/sesh/.config/sesh/sesh.toml" "$HOME/.config/sesh/sesh.toml"
 link "$dotfiles_dir/direnv/.config/direnv/direnv.toml" "$HOME/.config/direnv/direnv.toml"
+link "$dotfiles_dir/direnv/.config/direnv/lib" "$HOME/.config/direnv/lib"
+link "$dotfiles_dir/lnav/formats" "$HOME/.config/lnav/formats/dotfiles"
 link "$dotfiles_dir/navi/cheats" "$HOME/.local/share/navi/cheats/dotfiles"
 link "$dotfiles_dir/ghostty/.config/ghostty/config" "$HOME/.config/ghostty/config"
 link "$dotfiles_dir/ghostty/.config/ghostty/shaders" "$HOME/.config/ghostty/shaders"

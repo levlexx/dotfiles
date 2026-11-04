@@ -34,6 +34,7 @@ which_key.add({
   { "<leader>q", group = "Quit / session" },
   { "<leader>u", group = "UI toggles" },
   { "<leader>a", group = "AI / agents" },
+  { "<leader>m", group = "Diagrams" },
   { "[", group = "Previous" },
   { "]", group = "Next" },
   { "g", group = "Goto" },

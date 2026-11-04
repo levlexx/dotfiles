@@ -1,0 +1,32 @@
+# C4 container view: the system boundary, its containers and the outside
+# world. Zoom levels: context (systems) -> containers (this) -> components.
+direction: right
+
+classes: {
+  person: {shape: c4-person}
+  external: {style: {fill: "#8a8a8a"; font-color: white; stroke: "#6b6b6b"}}
+  container: {style: {fill: "#438dd5"; font-color: white; stroke: "#3c7fc0"; border-radius: 8}}
+  store: {shape: cylinder; style: {fill: "#438dd5"; font-color: white; stroke: "#3c7fc0"}}
+}
+
+customer: "Customer\n[person]" {class: person}
+
+system: "App [system]" {
+  style: {stroke-dash: 4; fill: transparent}
+
+  spa: "Web app\n[Angular, Nx]" {class: container}
+  api: "API\n[Go, Cloud Run]" {class: container}
+  worker: "Worker\n[Go, Pub/Sub push]" {class: container}
+  db: "Database\n[Cloud SQL Postgres]" {class: store}
+
+  spa -> api: JSON/HTTPS
+  api -> db: reads/writes
+  worker -> db: writes
+}
+
+payments: "Payment provider\n[external system]" {class: external}
+email: "Email service\n[external system]" {class: external}
+
+customer -> system.spa: uses
+system.api -> payments: charges
+system.worker -> email: sends

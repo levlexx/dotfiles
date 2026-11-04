@@ -1,0 +1,21 @@
+# One request through the system, in order.
+shape: sequence_diagram
+
+client: Client
+api: API
+auth: Auth
+db: Postgres {shape: cylinder}
+queue: Events {shape: queue}
+
+client -> api: POST /orders
+api -> auth: verify token
+auth -> api: claims
+
+transaction: {
+  api -> db: BEGIN; INSERT order
+  db -> api: id
+  api -> db: COMMIT
+}
+
+api -> queue: order.created
+api -> client: 201 Created {style.stroke-dash: 3}

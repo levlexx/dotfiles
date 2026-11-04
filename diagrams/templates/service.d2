@@ -1,0 +1,28 @@
+# Service overview: who calls what. Rename, delete, add; `diag watch` shows
+# the result live. Docs: https://d2lang.com/tour/intro
+direction: right
+
+users: Users {shape: person}
+
+web: "Web app\n(Angular SPA)"
+
+api: API {
+  handlers: HTTP handlers
+  service: Domain services
+  repo: Repository
+
+  handlers -> service -> repo
+}
+
+db: Postgres {shape: cylinder}
+cache: Redis {shape: cylinder}
+queue: Events {shape: queue}
+worker: Worker
+
+users -> web: HTTPS
+web -> api.handlers: REST / JSON
+api.repo -> db: SQL
+api.service -> cache: read-through
+api.service -> queue: publish
+queue -> worker: consume
+worker -> db: write
