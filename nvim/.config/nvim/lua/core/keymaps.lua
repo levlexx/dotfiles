@@ -40,7 +40,7 @@ local function terminal(command, vertical)
     vim.cmd.split()
   end
   vim.cmd.enew()
-  vim.fn.termopen(command)
+  vim.fn.jobstart(command, { term = true })
   vim.cmd.startinsert()
 end
 
