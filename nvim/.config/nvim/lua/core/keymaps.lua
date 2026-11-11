@@ -33,7 +33,20 @@ local function delete_other_buffers()
   end
 end
 
-local function terminal(command, vertical)
+local tmux_bin = vim.env.TMUX and vim.fn.exepath("tmux") or ""
+
+local function terminal(command, vertical, hold)
+  if tmux_bin ~= "" then
+    local args = { tmux_bin, "split-window", vertical and "-h" or "-v", "-c", vim.fn.getcwd() }
+    if not vertical then
+      vim.list_extend(args, { "-l", "35%" })
+    end
+    if command ~= vim.o.shell then
+      table.insert(args, hold and (command .. "; exec " .. vim.o.shell) or command)
+    end
+    vim.system(args)
+    return
+  end
   if vertical then
     vim.cmd.vsplit()
   else
@@ -197,7 +210,7 @@ map("n", "<leader>wv", "<C-w>v", { desc = "Split right", remap = true })
 
 -- Terminal / tests -----------------------------------------------------------
 map("n", "<leader>tg", function()
-  terminal("go test ./...")
+  terminal("go test ./...", false, true)
 end, { desc = "Go test ./..." })
 map("n", "<leader>tt", function()
   terminal(vim.o.shell)

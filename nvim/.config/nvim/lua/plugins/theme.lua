@@ -57,9 +57,11 @@ end
 -- dark by default; with vim.g.follow_macos = true follow macOS light/dark
 -- like Ghostty and tmux: at startup, on focus and every 5s
 -- (AppleInterfaceStyle is only set in dark mode)
+local defaults_bin = vim.fn.exepath("defaults")
+
 local function macos_background()
   local ok, out = pcall(function()
-    return vim.system({ "defaults", "read", "-g", "AppleInterfaceStyle" }, { text = true }):wait(500)
+    return vim.system({ defaults_bin, "read", "-g", "AppleInterfaceStyle" }, { text = true }):wait(500)
   end)
   return (ok and out.code == 0) and "dark" or "light"
 end

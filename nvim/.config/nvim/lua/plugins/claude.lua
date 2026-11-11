@@ -13,13 +13,27 @@ vim.pack.add({
   load = true,
 })
 
+local tmux_bin = vim.env.TMUX and vim.fn.exepath("tmux") or ""
+
+-- Inside tmux Claude runs in a tmux split of this window: the nvim terminal
+-- scrolls its TUI sideways and breaks selection and copy. A new pane does not
+-- inherit nvim's environment, so the IDE connection variables go in with -e;
+-- the ✳ state hooks set window options, so they still mark this window.
+local function tmux_split(cmd, env)
+  local args = { tmux_bin, "split-window", "-h", "-l", "38%", "-c", vim.fn.getcwd() }
+  for key, value in pairs(env) do
+    vim.list_extend(args, { "-e", key .. "=" .. value })
+  end
+  table.insert(args, cmd)
+  return args
+end
+
 require("claudecode").setup({
   terminal = {
     split_side = "right",
     split_width_percentage = 0.38,
-    -- no snacks.nvim here; a plain split keeps TMUX_PANE, so the tmux ✳
-    -- state hooks still mark this window
-    provider = "native",
+    provider = tmux_bin ~= "" and "external" or "native",
+    provider_opts = { external_terminal_cmd = tmux_split },
   },
   diff_opts = {
     layout = "vertical",
