@@ -192,13 +192,14 @@ local claude_icons = {
 }
 local spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
 local claude = { state = "", frame = 1 }
+local tmux_bin = vim.fn.exepath("tmux")
 
 local function poll_claude_state()
   local pane = vim.env.TMUX_PANE
-  if not pane then
+  if not pane or tmux_bin == "" then
     return
   end
-  vim.system({ "tmux", "display", "-p", "-t", pane, "#{@claude_state}" }, { text = true }, function(out)
+  vim.system({ tmux_bin, "display", "-p", "-t", pane, "#{@claude_state}" }, { text = true }, function(out)
     local state = vim.trim(out.stdout or "")
     if state ~= claude.state then
       claude.state = state
